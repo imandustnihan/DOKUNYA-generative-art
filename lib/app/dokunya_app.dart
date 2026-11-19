@@ -800,8 +800,9 @@ class _WorkspaceState extends State<Workspace> {
                                                         .toggleFavoriteInstrument(
                                                           id,
                                                         );
-                                                    if (sheetContext.mounted)
+                                                    if (sheetContext.mounted) {
                                                       update(() {});
+                                                    }
                                                   }),
                                                 ),
                                               ),
@@ -1535,7 +1536,7 @@ class _WorkspaceState extends State<Workspace> {
               ),
               TextButton(
                 onPressed: _openEngineLibrary,
-                child: Text(t('engineAll') + ' →'),
+                child: Text("${t('engineAll')} →"),
               ),
             ],
           ),

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:material_ui/material_ui.dart';
 
 import 'art_engine.dart';
-import 'art_model.dart';
 import 'engine_catalog.dart';
 
 /// Ten independent drawing kernels, each with ten algorithmically different

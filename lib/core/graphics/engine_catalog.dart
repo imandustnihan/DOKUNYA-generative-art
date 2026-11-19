@@ -139,13 +139,15 @@ const engineTitles = <List<String>>[
 const instrumentCount = 100;
 
 String instrumentName(int id) {
-  if (id < 0 || id >= instrumentCount)
+  if (id < 0 || id >= instrumentCount) {
     throw RangeError.range(id, 0, instrumentCount - 1);
+  }
   return engineTitles[id ~/ 10][id % 10];
 }
 
 String instrumentFamily(int id) {
-  if (id < 0 || id >= instrumentCount)
+  if (id < 0 || id >= instrumentCount) {
     throw RangeError.range(id, 0, instrumentCount - 1);
+  }
   return engineFamilies[id ~/ 10];
 }
