@@ -444,7 +444,15 @@ class _WorkspaceState extends State<Workspace> {
             Padding(
               padding: const EdgeInsets.only(right: 18),
               child: Text(
-                t(c.draftSaveFailed ? 'draftSaveFailed' : c.recoveredOnStartup ? 'draftRecovered' : c.dirty ? 'unsaved' : 'local'),
+                t(
+                  c.draftSaveFailed
+                      ? 'draftSaveFailed'
+                      : c.recoveredOnStartup
+                      ? 'draftRecovered'
+                      : c.dirty
+                      ? 'unsaved'
+                      : 'local',
+                ),
                 style: const TextStyle(color: muted, fontSize: 12),
               ),
             ),
