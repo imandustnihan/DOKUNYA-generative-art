@@ -183,7 +183,7 @@ class _WorkspaceState extends State<Workspace> {
   Future<void> _import() async {
     try {
       const group = XTypeGroup(
-        label: 'DOKUNYA / RENIZ / ARTPULSE JSON',
+        label: 'DOKUNYA project JSON',
         extensions: ['json'],
         mimeTypes: ['application/json'],
         uniformTypeIdentifiers: ['public.json'],

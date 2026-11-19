@@ -1,16 +1,16 @@
 # DOKUNYA — ad değişikliği ve uyumluluk (19 Kasım 2026)
 
-Kullanıcı onayıyla mevcut proje **DOKUNYA** oldu (dokun + dünya). Önceki marka adları **ARTPULSE** ve **RENIZ** idi. Proje sıfırdan yeniden oluşturulmadı; Flutter sanat motoru ve beş mod korundu.
+Kullanıcı onayıyla mevcut proje **DOKUNYA** oldu (dokun + dünya). İlk geliştirme adı **ARTPULSE** idi; güncel görünür marka **DOKUNYA**'dır. Proje sıfırdan yeniden oluşturulmadı; Flutter sanat motoru ve beş mod korundu.
 
 ## Görünür ve teknik değişiklikler
 
 - Flutter/Dart paket adı `dokunya`, Dart importları `package:dokunya/...`, uygulama sınıfı `DokunyaApp`.
 - Android, iOS, macOS, Windows, Linux ve web'de görünür ad `DOKUNYA`.
 - Yeni PNG dışa aktarma `DOKUNYA_*`; düzenlenebilir dosyalar `.dokunya.json`.
-- **Eski `.artpulse.json` ve `.reniz.json` projeleri okunabilmeye devam eder.** `schemaVersion` ve `ProjectCodec` değiştirilmedi.
+- **Önceki sürümlerin `.json` projeleri okunabilmeye devam eder.** `schemaVersion` ve `ProjectCodec` değiştirilmedi.
 - Android applicationId / Kotlin paketi `dev.artpulse.artpulse`, iOS/macOS bundle ID `dev.artpulse.artpulse` ve Linux application ID aynı kaldı. Bunlar uygulama güncellemesi sırasında kimlik ve mevcut verilere erişimi korumak için önemlidir.
 - Yerel `artpulse_projects` kayıt dizini, tarayıcı `artpulse-studio` IndexedDB adı, mevcut web PWA `id` / `scope` ve platform kanalları değiştirilmedi.
-- `RENIZ_TV` ve `ARTPULSE_TV` derleme seçenekleri önceki betikler için çalışmaya devam eder; güncel ayar `DOKUNYA_TV` olur.
+- `DOKUNYA_TV` güncel TV derleme seçeneğidir. `ARTPULSE_TV` eski betikler için desteklenmeye devam eder.
 - Önceki ARTPULSE v0.1.0 test kanıtları yeniden çalıştırılmış DOKUNYA testleri olarak sunulmaz.
 
 ## Paket ve doğrulama

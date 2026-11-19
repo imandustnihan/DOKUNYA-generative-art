@@ -17,7 +17,7 @@ An offline generative art instrument built with Flutter and Dart. Draw with touc
 - English, Turkish and Azerbaijani, reduced motion and experimental TV/ambient layouts.
 - No account, backend, telemetry, advertising or paid service.
 
-This is the DOKUNYA v0.1.2+3 source rebrand of the existing ARTPULSE v0.1.0 → RENIZ v0.1.1 development codebase. The renamed source has not yet been built on the target platforms. The Android application ID and iOS/macOS bundle identifier are deliberately unchanged, and the original local storage paths remain, so previous projects remain addressable. Existing APKs remain ARTPULSE-branded until a new build is completed. A matching signing key is required for in-place Android updates. [Platform support](docs/PLATFORM_SUPPORT.md) and [test evidence](docs/TEST_REPORT.md) distinguish compiled targets, automated tests and hardware that has not been tested. No installable iPhone IPA or Windows EXE is claimed unless such a build actually exists.
+This is the DOKUNYA v0.1.2+3 source rebrand of the existing ARTPULSE v0.1.0 development codebase. The renamed source has not yet been built on the target platforms. The Android application ID and iOS/macOS bundle identifier are deliberately unchanged, and the original local storage paths remain, so previous projects remain addressable. Existing APKs remain ARTPULSE-branded until a new build is completed. A matching signing key is required for in-place Android updates. [Platform support](docs/PLATFORM_SUPPORT.md) and [test evidence](docs/TEST_REPORT.md) distinguish compiled targets, automated tests and hardware that has not been tested. No installable iPhone IPA or Windows EXE is claimed unless such a build actually exists.
 
 ## Run the source
 
@@ -109,4 +109,4 @@ Optional browser QA uses Playwright 1.62.1: install it as a development tool and
 
 ## Safe rename and backward compatibility
 
-See [DOKUNYA rename and migration notes](docs/DOKUNYA_RENAME_TR.md). Old `.artpulse.json` and `.reniz.json` exports can still be imported; new exports use `.dokunya.json`. The earlier `docs/evidence` and historical platform/test reports describe **ARTPULSE v0.1.0**, not newly-run DOKUNYA tests.
+See [DOKUNYA rename and migration notes](docs/DOKUNYA_RENAME_TR.md). Older `.json` exports, including `.artpulse.json`, can still be imported; new exports use `.dokunya.json`. The earlier `docs/evidence` and historical platform/test reports describe **ARTPULSE v0.1.0**, not newly-run DOKUNYA tests.
