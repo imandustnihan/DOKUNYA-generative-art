@@ -70,6 +70,26 @@ jobs:
         if: matrix.target == 'linux'
         run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
       - run: flutter pub get
+      - name: Install Android SDK CMake with retries
+        if: matrix.target == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          manager="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+          if [[ ! -x "$manager" ]]; then
+            manager="$(command -v sdkmanager)"
+          fi
+          for attempt in 1 2 3 4; do
+            if "$manager" --sdk_root="$sdk_root" "cmake;3.22.1"; then
+              echo "Android CMake 3.22.1 installed"
+              exit 0
+            fi
+            echo "::warning::CMake download failed (attempt $attempt/4)"
+            sleep "$((attempt * 5))"
+          done
+          echo "::error::Unable to install required Android CMake after four attempts"
+          exit 1
       - name: Android development-signed APK
         if: matrix.target == 'android'
         run: flutter build apk --release

@@ -60,6 +60,19 @@ class Workspace extends StatefulWidget {
 }
 
 class _WorkspaceState extends State<Workspace> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (c.repository.unreadableDraft) {
+        toast('draftCorrupt');
+      } else if (c.recoveredOnStartup) {
+        toast('draftRecovered');
+      }
+    });
+  }
+
   StudioController get c => widget.controller;
   bool _controlsVisible = true;
   bool _shortLayout = false;
