@@ -49,4 +49,31 @@ class ProjectRepository {
 
   Future<void> savePreferences(Map<String, Object> preferences) =>
       _serialize(() => store.write('preferences', jsonEncode(preferences)));
+
+  /// Keeps in-progress artwork separate from the user's named projects.
+  Future<void> saveDraft(ArtDocument document) => _serialize(
+    () => store.write('workspace_draft', ProjectCodec.encode(document)),
+  );
+
+  bool unreadableDraft = false;
+
+  /// Invalid project JSON remains on disk so it can be recovered manually.
+  Future<ArtDocument?> loadDraft() async {
+    await _queue;
+    final raw = await store.read('workspace_draft');
+    unreadableDraft = false;
+    if (raw == null) return null;
+    try {
+      return ProjectCodec.decode(raw);
+    } on FormatException {
+      unreadableDraft = true;
+      return null;
+    } on TypeError {
+      unreadableDraft = true;
+      return null;
+    }
+  }
+
+  Future<void> clearDraft() =>
+      _serialize(() => store.remove('workspace_draft'));
 }
