@@ -95,7 +95,8 @@ class ArtStrings {
       'startupError': 'Local storage could not be opened. Enable browser storage or check disk access, then retry.',
       'retry': 'Retry',
       'saving': 'Saving…',
-      'about': 'DOKUNYA — touch and create your own world. Your offline art studio.',
+      'about':
+          'DOKUNYA — touch and create your own world. Your offline art studio.',
       'motionPaused': 'Motion paused',
       'paletteName': 'Palette',
       'canvas': 'Interactive artwork. Drag to draw; use two fingers to zoom.',
@@ -194,7 +195,8 @@ class ArtStrings {
       'startupError': 'Yerel kayıt açılamadı. Tarayıcı depolamasını veya disk erişimini kontrol edip tekrar dene.',
       'retry': 'Yeniden dene',
       'saving': 'Kaydediliyor…',
-      'about': 'DOKUNYA — dokun, kendi dünyanı yarat. Çevrimdışı sanat stüdyon.',
+      'about':
+          'DOKUNYA — dokun, kendi dünyanı yarat. Çevrimdışı sanat stüdyon.',
       'motionPaused': 'Hareket duraklatıldı',
       'paletteName': 'Palet',
       'canvas': 'Etkileşimli sanat alanı. Çizmek için sürükle, iki parmakla yakınlaştır.',
@@ -293,7 +295,8 @@ class ArtStrings {
       'startupError': 'Yerli yaddaş açılmadı. Brauzer yaddaşını və ya diskə girişi yoxlayıb yenidən cəhd et.',
       'retry': 'Yenidən cəhd et',
       'saving': 'Saxlanılır…',
-      'about': 'DOKUNYA — toxun, öz dünyanı yarat. Sənin oflayn sənət studiyan.',
+      'about':
+          'DOKUNYA — toxun, öz dünyanı yarat. Sənin oflayn sənət studiyan.',
       'motionPaused': 'Hərəkət dayandırıldı',
       'paletteName': 'Palitra',
       'canvas': 'İnteraktiv sənət sahəsi. Çəkmək üçün sürüşdür, iki barmaqla yaxınlaşdır.',

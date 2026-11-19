@@ -32,7 +32,8 @@ Future<void> launchDokunya() async {
   try {
     final store = await createStore();
     final controller = StudioController(ProjectRepository(store));
-    const forceTv = bool.fromEnvironment('DOKUNYA_TV') ||
+    const forceTv =
+        bool.fromEnvironment('DOKUNYA_TV') ||
         bool.fromEnvironment('ARTPULSE_TV');
     await controller.load(
       television: forceTv || await detectTv(),

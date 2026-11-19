@@ -8,7 +8,8 @@ import 'package:dokunya/core/storage/project_repository.dart';
 
 void main() {
   test('DOKUNYA imports the original browser-exported ARTPULSE v0.1 JSON', () {
-    final raw = File('test/fixtures/legacy_artpulse_v0_1.json').readAsStringSync();
+    final raw = File('test/fixtures/legacy_artpulse_v0_1.json')
+        .readAsStringSync();
     final original = ProjectCodec.decode(raw);
     expect(original.name, 'Browser verified');
     final encoded = ProjectCodec.encode(original);
@@ -37,7 +38,10 @@ void main() {
     engine.begin(4, .1, .2, .5);
     engine.move(4, .7, .9, .8);
     engine.end(4);
-    final prior = engine.snapshot(id: 'legacy-v011-saved', name: 'Legacy v0.1.1 sample');
+    final prior = engine.snapshot(
+      id: 'legacy-v011-saved',
+      name: 'Legacy v0.1.1 sample',
+    );
     final bytes = ProjectCodec.encode(prior);
     final imported = ProjectCodec.decode(bytes);
     expect(imported.id, 'legacy-v011-saved');
