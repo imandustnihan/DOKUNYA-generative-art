@@ -30,6 +30,7 @@ try {
   await page.goto(origin + base, {waitUntil:'domcontentloaded'});
   assert((await page.locator('h1').innerText()).length > 15, 'Homepage has no real heading');
   assert.equal(await page.locator('.engine-card').count(),5);
+  await page.locator('.visual-frame img').evaluate(async (image) => { await image.decode(); if (!image.naturalWidth) throw new Error('Engine-rendered hero poster unavailable'); });
   await page.screenshot({path:join(evidence,'premium-home-desktop.png'),fullPage:true});
   const navigation = [
     ['discover/', '.discovery-item', 5],
@@ -55,6 +56,7 @@ try {
   await page.setViewportSize({width:390,height:844});
   await page.reload();
   assert.equal(await page.locator('h1').isVisible(),true);
+  await page.locator('.visual-frame img').evaluate(async (image) => { await image.decode(); if (!image.naturalWidth) throw new Error('Mobile engine poster unavailable'); });
   await page.screenshot({path:join(evidence,'premium-home-mobile.png'),fullPage:true});
   await page.locator('.mobile-nav summary').click();
   assert.equal(await page.locator('.mobile-nav nav').isVisible(),true);
