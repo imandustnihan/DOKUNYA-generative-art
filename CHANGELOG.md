@@ -2,7 +2,7 @@
 
 - User-selected name: **DOKUNYA** (*dokun* + *dünya*).
 - Updated Flutter package, app names and visual branding across platforms.
-- New export filenames `.dokunya.json`; legacy `.artpulse.json` and `.reniz.json` remain importable.
+- New export filenames `.dokunya.json`; JSON exports from previous versions remain importable.
 - Retained original installed application identifiers and local storage to protect existing work.
 - Previous builds are not renamed binaries. New builds still require validation.
 
