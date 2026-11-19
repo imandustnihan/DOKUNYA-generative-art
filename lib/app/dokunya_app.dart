@@ -205,7 +205,7 @@ class _WorkspaceState extends State<Workspace> {
   }
 
   Future<bool> _preserveWork() async {
-    if (!c.dirty || c.engine.strokes.isEmpty) return true;
+    if (!c.dirty) return true;
     // Keep the existing piece as a recoverable local composition before replacing it.
     try {
       await c.save(c.name);
@@ -431,12 +431,28 @@ class _WorkspaceState extends State<Workspace> {
           ),
         ],
         const Spacer(),
+        if (c.draftSaveFailed)
+          Tooltip(
+            message: t('draftSaveFailed'),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.warning_amber_rounded, color: Colors.amber),
+            ),
+          ),
         if (c.page == WorkspacePage.studio) ...[
           if (width >= 950)
             Padding(
               padding: const EdgeInsets.only(right: 18),
               child: Text(
-                t(c.dirty ? 'unsaved' : 'local'),
+                t(
+                  c.draftSaveFailed
+                      ? 'draftSaveFailed'
+                      : c.recoveredOnStartup
+                      ? 'draftRecovered'
+                      : c.dirty
+                      ? 'unsaved'
+                      : 'local',
+                ),
                 style: const TextStyle(color: muted, fontSize: 12),
               ),
             ),
