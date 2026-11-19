@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -18,13 +19,22 @@ class ArtClock extends ChangeNotifier {
 }
 
 class StudioController extends ChangeNotifier with WidgetsBindingObserver {
-  StudioController(this.repository, {this.animate = true}) {
+  StudioController(
+    this.repository, {
+    this.animate = true,
+    this.draftDelay = const Duration(seconds: 2),
+  }) {
     _ticker = Ticker(_tick);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addTimingsCallback(_timings);
   }
   final ProjectRepository repository;
   final bool animate;
+  final Duration draftDelay;
+  Timer? _draftTimer;
+  int _draftRevision = 0;
+  bool recoveredOnStartup = false;
+  bool draftSaveFailed = false;
   final engine = ArtEngine();
   final clock = ArtClock();
   final autoQuality = AutoQuality();
@@ -88,6 +98,23 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
         Quality.values.where((q) => q.name == pref['quality']).firstOrNull ??
         Quality.auto;
     await refreshGallery();
+    final draft = await repository.loadDraft();
+    if (draft != null) {
+      final newerManualSave = documents.any(
+        (saved) =>
+            saved.id == draft.id &&
+            saved.savedAt.compareTo(draft.savedAt) >= 0,
+      );
+      if (!newerManualSave) {
+        engine.restore(draft);
+        projectId = documents.any((saved) => saved.id == draft.id)
+            ? draft.id
+            : null;
+        name = draft.name;
+        dirty = true;
+        recoveredOnStartup = true;
+      }
+    }
     _setBudget();
     _syncTicker();
     notifyListeners();
@@ -176,7 +203,10 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     foreground = state == AppLifecycleState.resumed;
-    if (!foreground) engine.endAll();
+    if (!foreground) {
+      engine.endAll();
+      if (dirty) unawaited(flushDraft());
+    }
     _syncTicker();
   }
 
@@ -186,56 +216,114 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  /// Debounce storage writes without interrupting the drawing loop.
+  void _scheduleDraft() {
+    if (_disposed || !dirty) return;
+    _draftTimer?.cancel();
+    _draftTimer = Timer(draftDelay, () {
+      _draftTimer = null;
+      unawaited(flushDraft());
+    });
+  }
+
+  /// Preserve the latest workspace; storage failures never erase the canvas.
+  Future<bool> flushDraft() async {
+    _draftTimer?.cancel();
+    _draftTimer = null;
+    if (_disposed || !dirty) return false;
+    final revision = _draftRevision;
+    try {
+      final draft = engine.snapshot(
+        id: projectId ?? 'autosave_draft',
+        name: name.trim().isEmpty ? 'Untitled 01' : name.trim(),
+      );
+      await repository.saveDraft(draft);
+      if (!_disposed) {
+        if (revision != _draftRevision) _scheduleDraft();
+        if (draftSaveFailed) {
+          draftSaveFailed = false;
+          notifyListeners();
+        }
+      }
+      return true;
+    } catch (_) {
+      if (!_disposed) {
+        draftSaveFailed = true;
+        notifyListeners();
+      }
+      return false;
+    }
+  }
+
+  void _markDirty() {
+    dirty = true;
+    recoveredOnStartup = false;
+    _draftRevision++;
+    _scheduleDraft();
+  }
+
+  void _discardDraft() {
+    _draftRevision++;
+    _draftTimer?.cancel();
+    _draftTimer = null;
+    recoveredOnStartup = false;
+    draftSaveFailed = false;
+    // Serialized after earlier draft writes. The new workspace is preserved
+    // independently by its next scheduled save.
+    unawaited(repository.clearDraft().catchError((Object _) {}));
+  }
+
   void change(ArtSettings value) {
     engine.settings = value;
     _setBudget();
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
 
   void begin(int id, double x, double y, double pressure) {
     engine.begin(id, x, y, pressure);
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
 
   void move(int id, double x, double y, double pressure) {
     engine.move(id, x, y, pressure);
-    dirty = true;
+    _markDirty();
     clock.pulse();
   }
 
   void end(int id) {
     engine.end(id);
+    if (dirty) _scheduleDraft();
     notifyListeners();
   }
 
   void undo() {
     engine.undo();
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
 
   void redo() {
     engine.redo();
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
 
   void clear() {
     engine.clear();
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
 
   void restart() {
     engine.restart((engine.seed * 1664525 + 1013904223) & 0xffffffff);
-    dirty = true;
+    _markDirty();
     clock.pulse();
     notifyListeners();
   }
@@ -282,20 +370,40 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
       throw const FormatException('name');
     }
     final id = projectId ?? 'art_${DateTime.now().microsecondsSinceEpoch}';
+    final snapshotRevision = _draftRevision;
     final doc = engine.snapshot(id: id, name: trimmed);
-    await repository.save(doc);
+    try {
+      await repository.save(doc);
+      // Serialized after pending drafts so an old write cannot resurrect one.
+      await repository.clearDraft();
+    } catch (_) {
+      _scheduleDraft();
+      rethrow;
+    }
     projectId = id;
     name = trimmed;
-    dirty = false;
+    if (snapshotRevision == _draftRevision) {
+      _draftTimer?.cancel();
+      _draftTimer = null;
+      dirty = false;
+      draftSaveFailed = false;
+      recoveredOnStartup = false;
+    } else {
+      // Edits made while the save was in flight still require recovery.
+      dirty = true;
+      await flushDraft();
+    }
     await refreshGallery();
     notifyListeners();
   }
 
   void open(ArtDocument document, {bool imported = false}) {
+    _discardDraft();
     engine.restore(document);
     projectId = imported ? null : document.id;
     name = document.name;
     dirty = imported;
+    if (imported) _markDirty();
     page = WorkspacePage.studio;
     resetView();
     _syncTicker();
@@ -313,12 +421,13 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void preset(ArtMode mode, {int palette = 0, int seed = 2749}) {
+    _discardDraft();
     projectId = null;
     name = '${modeNames[mode.index]} ${seed % 1000}';
     engine.settings = ArtSettings(mode: mode, palette: palette);
     engine.restart(seed);
     page = WorkspacePage.studio;
-    dirty = true;
+    _markDirty();
     resetView();
     _setBudget();
     _syncTicker();
@@ -367,6 +476,8 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    if (dirty) unawaited(flushDraft());
+    _draftTimer?.cancel();
     _disposed = true;
     _ticker.dispose();
     WidgetsBinding.instance.removeObserver(this);
