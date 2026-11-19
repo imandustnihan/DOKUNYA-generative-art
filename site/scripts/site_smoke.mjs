@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
-import { readFileSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, statSync, existsSync, mkdirSync } from 'node:fs';
 import { resolve, join, extname, sep } from 'node:path';
 import assert from 'node:assert/strict';
 
@@ -22,12 +22,15 @@ await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
 const origin = 'http://127.0.0.1:' + server.address().port;
 const browser = await chromium.launch({ headless:true, args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader'] });
 const errors=[];
+const evidence = resolve(import.meta.dirname, '..', '..', 'build', 'browser-evidence');
+mkdirSync(evidence, { recursive: true });
 try {
   const page = await browser.newPage({ viewport:{width:1400,height:880} });
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.goto(origin + base, {waitUntil:'domcontentloaded'});
   assert((await page.locator('h1').innerText()).length > 15, 'Homepage has no real heading');
   assert.equal(await page.locator('.engine-card').count(),5);
+  await page.screenshot({path:join(evidence,'premium-home-desktop.png'),fullPage:true});
   const navigation = [
     ['discover/', '.discovery-item', 5],
     ['guide/', '.info-panel', 6],
@@ -52,6 +55,7 @@ try {
   await page.setViewportSize({width:390,height:844});
   await page.reload();
   assert.equal(await page.locator('h1').isVisible(),true);
+  await page.screenshot({path:join(evidence,'premium-home-mobile.png'),fullPage:true});
   await page.locator('.mobile-nav summary').click();
   assert.equal(await page.locator('.mobile-nav nav').isVisible(),true);
   await page.locator('.mobile-nav a[data-language-choice="az"]').click();

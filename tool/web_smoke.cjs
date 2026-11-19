@@ -3,7 +3,8 @@
 const {chromium}=require('playwright');
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(process.argv[2]||'build/web');
-const basePath='/' + (process.env.DOKUNYA_WEB_BASE || '/').replace(/^\/+|\/+$/g,'') + '/';
+const normalizedBase=(process.env.DOKUNYA_WEB_BASE || '/').replace(/^\/+|\/+$/g,'');
+const basePath=normalizedBase ? '/'+normalizedBase+'/' : '/';
 const evidence=path.resolve(process.env.ARTPULSE_EVIDENCE||'build/browser-evidence');
 fs.mkdirSync(evidence,{recursive:true});
 const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.wasm':'application/wasm','.png':'image/png','.ttf':'font/ttf','.otf':'font/otf'};
