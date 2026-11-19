@@ -1,0 +1,35 @@
+{
+  "version": "0.1.0+1",
+  "date": "2026-11-19",
+  "runtime_source_commit": "b13efdae8fd2108aad6c968ddb9cc9d01b589462",
+  "flutter": "3.50.0",
+  "dart": "3.14.0",
+  "flutter_test_cases": 38,
+  "browser_flows": 9,
+  "browser": "158.0.8127.36",
+  "physical_device_tests": 0,
+  "github_published": false,
+  "packages": [
+    {
+      "filename": "ARTPULSE_v0.1.0_Android_DevSigned.apk",
+      "bytes": 53470677,
+      "sha256": "f9bf0b391f84a5480098253453952364fa36b1070902d08ce60d1635c530e0b0"
+    },
+    {
+      "filename": "ARTPULSE_v0.1.0_Web.zip",
+      "bytes": 14915527,
+      "sha256": "283d6156e91b031a626b7044e6543e1c81e2b8cf8fad1a6c6b31af305bcc952f"
+    },
+    {
+      "filename": "ARTPULSE_v0.1.0_Linux_x64.tar.gz",
+      "bytes": 10675035,
+      "sha256": "07b862189ec971299c506b7288ac449c32ce2f1fb597c200ed48fc8d99a9eccb"
+    }
+  ],
+  "not_built": [
+    "Windows EXE",
+    "macOS app",
+    "iOS Simulator/IPA",
+    "Tizen/webOS/tvOS packages"
+  ]
+}

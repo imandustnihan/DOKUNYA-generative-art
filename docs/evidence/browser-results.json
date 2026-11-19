@@ -1,0 +1,47 @@
+{
+  "browser": "158.0.8127.36",
+  "renderer": "CanvasKit / software SwiftShader in an isolated headless test",
+  "results": [
+    {
+      "test": "pointer drawing, palette and IndexedDB save",
+      "status": "passed",
+      "samples": 20
+    },
+    {
+      "test": "all five engine controls",
+      "status": "passed"
+    },
+    {
+      "test": "PNG browser download",
+      "status": "passed",
+      "bytes": 748189
+    },
+    {
+      "test": "editable JSON browser download",
+      "status": "passed"
+    },
+    {
+      "test": "reload, collection and reopen",
+      "status": "passed"
+    },
+    {
+      "test": "corrupt file import error",
+      "status": "passed"
+    },
+    {
+      "test": "Turkish and Azerbaijani preferences",
+      "status": "passed"
+    },
+    {
+      "test": "PWA offline reload with saved data and locale",
+      "status": "passed",
+      "cachedResources": 47
+    },
+    {
+      "test": "no external runtime HTTP requests or uncaught page errors",
+      "status": "passed"
+    }
+  ],
+  "externalRequests": [],
+  "uncaughtErrors": []
+}

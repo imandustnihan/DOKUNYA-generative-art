@@ -1,0 +1,63 @@
+{
+  "scope": "AOT CPU simulation only; excludes painting, GPU, battery and physical-device behavior",
+  "dart": "3.14.0 (stable) (Wed Nov 4 16:28:39 2026 -0800) on \"linux_x64\"",
+  "os": "Linux 6.18.57 #1 SMP Tue Oct 20 21:56:04 UTC 2026",
+  "processors": 9,
+  "results": [
+    {
+      "profile": "eco",
+      "particles": 80,
+      "steps": 3600,
+      "mean_us": 12.343333333333334,
+      "p50_us": 9,
+      "p95_us": 12,
+      "max_us": 5192,
+      "rss_before": 8310784,
+      "rss_after": 8851456
+    },
+    {
+      "profile": "low",
+      "particles": 180,
+      "steps": 3600,
+      "mean_us": 28.66861111111111,
+      "p50_us": 26,
+      "p95_us": 28,
+      "max_us": 1104,
+      "rss_before": 9588736,
+      "rss_after": 9605120
+    },
+    {
+      "profile": "medium",
+      "particles": 400,
+      "steps": 3600,
+      "mean_us": 63.70388888888889,
+      "p50_us": 59,
+      "p95_us": 99,
+      "max_us": 686,
+      "rss_before": 9711616,
+      "rss_after": 9768960
+    },
+    {
+      "profile": "high",
+      "particles": 800,
+      "steps": 3600,
+      "mean_us": 122.24083333333333,
+      "p50_us": 114,
+      "p95_us": 204,
+      "max_us": 3352,
+      "rss_before": 9875456,
+      "rss_after": 9883648
+    },
+    {
+      "profile": "ultra",
+      "particles": 1400,
+      "steps": 3600,
+      "mean_us": 387.11333333333334,
+      "p50_us": 175,
+      "p95_us": 1176,
+      "max_us": 36137,
+      "rss_before": 10100736,
+      "rss_after": 10153984
+    }
+  ]
+}

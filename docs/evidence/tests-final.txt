@@ -1,0 +1,41 @@
+00:00 +0: loading [workspace]/artpulse/test/storage_test.dart
+00:00 +0: [workspace]/artpulse/test/storage_test.dart: repository serializes writes and preserves actual strokes
+00:00 +1: [workspace]/artpulse/test/storage_test.dart: failed write surfaces an error and does not poison later saves
+00:00 +2: [workspace]/artpulse/test/storage_test.dart: corrupt saved projects remain untouched and are reported
+00:00 +3: [workspace]/artpulse/test/storage_test.dart: native storage replaces files and recovers an interrupted rename
+00:00 +4: [workspace]/artpulse/test/engine_test.dart: 32-bit hash multiplication matches an exact large-integer reference
+00:00 +5: [workspace]/artpulse/test/engine_test.dart: seeded initialization and evolution are deterministic
+00:00 +6: [workspace]/artpulse/test/engine_test.dart: save/restoration preserves the next simulation step, not only the image
+00:00 +7: [workspace]/artpulse/test/engine_test.dart: gesture attraction changes the particle trajectory
+00:00 +8: [workspace]/artpulse/test/engine_test.dart: softened attraction stays finite at zero distance
+00:00 +9: [workspace]/artpulse/test/engine_test.dart: symmetry rotations preserve radius and close after a complete orbit
+00:00 +10: [workspace]/artpulse/test/engine_test.dart: smooth noise is bounded and continuous at lattice boundaries
+00:00 +11: [workspace]/artpulse/test/engine_test.dart: long sessions and hostile delta times have bounded finite state
+00:03 +12: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +13: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +14: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +15: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +16: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +17: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +18: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +19: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +20: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:03 +21: [workspace]/artpulse/test/widget_test.dart: draw, change mode and parameters, save, clear, reopen
+00:05 +22: [workspace]/artpulse/test/widget_test.dart: adaptive small_phone and golden
+00:06 +23: [workspace]/artpulse/test/widget_test.dart: adaptive large_phone and golden
+00:07 +24: [workspace]/artpulse/test/widget_test.dart: adaptive landscape_phone and golden
+00:07 +25: [workspace]/artpulse/test/widget_test.dart: adaptive tablet and golden
+00:08 +26: [workspace]/artpulse/test/widget_test.dart: adaptive desktop and golden
+00:08 +27: [workspace]/artpulse/test/widget_test.dart: adaptive tv and golden
+00:09 +28: [workspace]/artpulse/test/widget_test.dart: adaptive large_text and golden
+00:09 +29: [workspace]/artpulse/test/widget_test.dart: all three locales apply to the actual UI
+00:10 +30: [workspace]/artpulse/test/widget_test.dart: reduced motion and application background stop time progression
+00:10 +31: [workspace]/artpulse/test/widget_test.dart: two-finger zoom preserves project content
+00:10 +32: [workspace]/artpulse/test/widget_test.dart: remote-style focus traversal and activation need no mouse
+00:10 +33: [workspace]/artpulse/test/widget_test.dart: PNG renderer outputs real images for all engines
+00:11 +34: [workspace]/artpulse/test/widget_test.dart: real ticker stops in background and with reduced motion
+00:11 +35: [workspace]/artpulse/test/widget_test.dart: Liquid shader loads, renders and retains Canvas fallback
+00:11 +36: [workspace]/artpulse/test/widget_test.dart: animation repaints without replacing the canvas painter
+00:11 +37: [workspace]/artpulse/test/widget_test.dart: rotation preserves the drawing and releases transient pointers
+00:11 +38: [workspace]/artpulse/test/widget_test.dart: (tearDownAll)
+00:11 +38: All tests passed!

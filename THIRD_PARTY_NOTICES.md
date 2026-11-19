@@ -2,7 +2,7 @@
 
 Generated from the resolved package set, including SDK and test/build dependencies. Original ARTPULSE code is MIT. Complete dependency notices are preserved in [docs/licenses](docs/licenses). The Flutter engine may include further notices; release bundles include Flutter's generated NOTICES and the app's licence page. No art from comparison repositories was copied.
 
-Noto Sans font files are distributed under the SIL Open Font License; see [the bundled font notice](assets/fonts/LICENSE.txt). Material icons come from the Flutter SDK's licensed assets.
+Noto Sans font files are distributed under the SIL Open Font License; see [the bundled font notice](assets/fonts/LICENSE.txt). The SDK-bundled Roboto web fallback is Apache-2.0; its full notice is in assets/fonts/Roboto_LICENSE.txt. Material icons come from the Flutter SDK's licensed assets.
 
 | Package | Resolved package directory | Licence family |
 | --- | --- | --- |

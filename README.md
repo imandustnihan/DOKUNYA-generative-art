@@ -104,3 +104,5 @@ The included GitHub workflows analyze, test and build on matching operating syst
 Tizen, webOS and tvOS have researched port plans, not delivered packages. GIF/video export, layers, a timeline, OS live wallpapers, thermal sensors and dynamic raster-resolution scaling are outside this first release.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Original application code is [MIT](LICENSE); third-party notices are retained separately. The name ARTPULSE is not globally unique and no trademark clearance is claimed.
+
+Optional browser QA uses Playwright 1.62.1: install it as a development tool and run `node tool/web_smoke.cjs build/web`. Set `CHROME_EXECUTABLE` to an available Chromium/headless-shell executable when needed. This exercises actual browser storage, downloads and offline reload; it is not part of the app's runtime dependencies.

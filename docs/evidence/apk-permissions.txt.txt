@@ -1,0 +1,3 @@
+package: dev.artpulse.artpulse
+permission: dev.artpulse.artpulse.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission: name='dev.artpulse.artpulse.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION'
