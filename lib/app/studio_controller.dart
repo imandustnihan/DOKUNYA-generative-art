@@ -102,8 +102,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     if (draft != null) {
       final newerManualSave = documents.any(
         (saved) =>
-            saved.id == draft.id &&
-            saved.savedAt.compareTo(draft.savedAt) >= 0,
+            saved.id == draft.id && saved.savedAt.compareTo(draft.savedAt) >= 0,
       );
       if (!newerManualSave) {
         engine.restore(draft);
