@@ -1,0 +1,45 @@
+name: Publish web to GitHub Pages
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch 3.50.0 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: flutter pub get
+        env:
+          CI: 'true'
+          FLUTTER_SUPPRESS_ANALYTICS: 'true'
+      - name: Test and build Pages subpath
+        env:
+          CI: 'true'
+          FLUTTER_SUPPRESS_ANALYTICS: 'true'
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          flutter test
+          flutter build web --release --no-web-resources-cdn --base-href "/$REPOSITORY_NAME/"
+          python3 tool/prepare_web.py
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the tested build
+        id: deployment
+        uses: actions/deploy-pages@v4

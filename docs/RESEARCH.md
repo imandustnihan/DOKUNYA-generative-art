@@ -103,3 +103,11 @@ Sources: https://docs.flutter.dev/perf, https://docs.flutter.dev/tools/devtools/
 ## Naming and publication
 
 A GitHub search found existing public repositories called ArtPulse belonging to other owners. ARTPULSE is therefore not a globally unique name and no trademark clearance is claimed. A scoped search found no existing ARTPULSE repository for the connected owner. Prefer `artpulse-generative-art` for discoverability. MIT applies to original application code; Flutter and dependency notices remain separate. Only publish release binaries after an actual successful build, and distinguish automated tests from physical-device validation.
+
+## Verification-driven web correction
+
+A real headless Chrome run found a Roboto CDN request despite explicitly local CanvasKit. Inspecting Flutter 3.50.0's official tool/engine source showed that `--no-web-resources-cdn` also bundles its default Roboto fallback in FontManifest. All release web commands now use this flag, the fallback font licence is retained, and the runtime fallback-font base URL is restricted to the app origin. A browser test checks for external requests and an offline reload, instead of inferring offline behavior from a successful build. Unsupported glyph fallback may remain unavailable locally; the three supplied interface languages use bundled glyphs.
+
+Primary implementation sources: https://github.com/flutter/flutter/blob/3.50.0/packages/flutter_tools/lib/src/build_system/targets/web.dart and https://github.com/flutter/flutter/blob/3.50.0/engine/src/flutter/lib/web_ui/lib/src/engine/canvaskit/fonts.dart .
+
+Store-name searches did not establish an authoritative unique ARTPULSE listing or reserve the name. No store-name availability or trademark registration is claimed. The scoped GitHub repository check and the existing similarly named repositories are the only confirmed naming observations.
