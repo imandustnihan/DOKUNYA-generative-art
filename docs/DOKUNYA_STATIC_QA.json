@@ -26,7 +26,7 @@
     "Native channels preserved": true,
     "New JSON export names": true,
     "Old project schema/fixture preserved": true,
-    "RENIZ compatibility test": true,
+    "Legacy JSON compatibility test": true,
     "Old TV flag preserved": true,
     "New TV flag supported": true,
     "CI artifacts renamed": true,
