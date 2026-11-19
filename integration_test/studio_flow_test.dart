@@ -1,9 +1,9 @@
-import 'package:artpulse/app/artpulse_app.dart';
-import 'package:artpulse/app/studio_controller.dart';
-import 'package:artpulse/core/graphics/art_model.dart';
-import 'package:artpulse/core/graphics/art_painter.dart';
-import 'package:artpulse/core/storage/store.dart';
-import 'package:artpulse/core/storage/project_repository.dart';
+import 'package:reniz/app/reniz_app.dart';
+import 'package:reniz/app/studio_controller.dart';
+import 'package:reniz/core/graphics/art_model.dart';
+import 'package:reniz/core/graphics/art_painter.dart';
+import 'package:reniz/core/storage/store.dart';
+import 'package:reniz/core/storage/project_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -23,7 +23,7 @@ void main() {
         await repository.delete(id);
         c.dispose();
       });
-      await tester.pumpWidget(ArtPulseApp(controller: c));
+      await tester.pumpWidget(RenizApp(controller: c));
       await tester.pumpAndSettle();
       final canvas = find.byKey(const ValueKey('art_canvas'));
       final gesture = await tester.startGesture(tester.getCenter(canvas));

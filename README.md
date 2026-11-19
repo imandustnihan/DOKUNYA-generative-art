@@ -1,8 +1,8 @@
-# ARTPULSE
+# RENIZ
 
 An offline generative art instrument built with Flutter and Dart. Draw with touch, a stylus or a mouse; shape a live composition, save an editable project and export the art as PNG. Free and open source under MIT.
 
-![ARTPULSE desktop studio — real headless Chrome web render](docs/screenshots/studio-desktop.png)
+![Legacy ARTPULSE v0.1.0 studio screenshot — RENIZ rebrand pending fresh render](docs/screenshots/studio-desktop.png)
 
 ## What works in 0.1.0
 
@@ -17,7 +17,7 @@ An offline generative art instrument built with Flutter and Dart. Draw with touc
 - English, Turkish and Azerbaijani, reduced motion and experimental TV/ambient layouts.
 - No account, backend, telemetry, advertising or paid service.
 
-This is an initial development release. [Platform support](docs/PLATFORM_SUPPORT.md) and [test evidence](docs/TEST_REPORT.md) distinguish compiled targets, automated tests and hardware that has not been tested. No installable iPhone IPA or Windows EXE is claimed unless such a build actually exists.
+This is the RENIZ v0.1.1 source rebrand of the ARTPULSE v0.1.0 development release. The renamed source has not yet been built on the target platforms. The Android application ID and iOS/macOS bundle identifier are deliberately unchanged, and the original local storage paths remain, so previous projects remain addressable. Existing APKs remain ARTPULSE-branded until a new build is completed. A matching signing key is required for in-place Android updates. [Platform support](docs/PLATFORM_SUPPORT.md) and [test evidence](docs/TEST_REPORT.md) distinguish compiled targets, automated tests and hardware that has not been tested. No installable iPhone IPA or Windows EXE is claimed unless such a build actually exists.
 
 ## Run the source
 
@@ -48,7 +48,7 @@ For an automated environment, set `CI=true` and `FLUTTER_SUPPRESS_ANALYTICS=true
 | Linux | `flutter build linux --release` | Clang, CMake, Ninja, pkg-config, GTK 3 development libraries |
 | macOS | `flutter build macos --release` | macOS + Xcode; signing/notarization are separate |
 | iOS Simulator | `flutter build ios --simulator --debug --no-codesign` | macOS + Xcode; this is not an iPhone IPA |
-| Android TV source | `flutter run --dart-define=ARTPULSE_TV=true` | Android TV target and remote/device verification |
+| Android TV source | `flutter run --dart-define=RENIZ_TV=true` | Android TV target and remote/device verification |
 
 The Android release configuration deliberately uses a **development signing certificate** for initial sideload testing. Configure a privately held release key before store distribution or long-term updates. No keystore or certificate is included in source control.
 
@@ -84,7 +84,7 @@ dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
 python3 tool/license_audit.py
-dart compile exe tool/benchmark.dart -o build/artpulse-benchmark
+dart compile exe tool/benchmark.dart -o build/reniz-benchmark
 ```
 
 A real-storage integration test is supplied for a compatible device/runner:
@@ -103,6 +103,10 @@ The included GitHub workflows analyze, test and build on matching operating syst
 
 Tizen, webOS and tvOS have researched port plans, not delivered packages. GIF/video export, layers, a timeline, OS live wallpapers, thermal sensors and dynamic raster-resolution scaling are outside this first release.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Original application code is [MIT](LICENSE); third-party notices are retained separately. The name ARTPULSE is not globally unique and no trademark clearance is claimed.
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Original application code is [MIT](LICENSE); third-party notices are retained separately. RENIZ is a proposed name formed from Turkish/Azerbaijani *renk* (colour) and *iz* (trace). Name checks are preliminary and do not provide trademark clearance.
 
 Optional browser QA uses Playwright 1.62.1: install it as a development tool and run `node tool/web_smoke.cjs build/web`. Set `CHROME_EXECUTABLE` to an available Chromium/headless-shell executable when needed. This exercises actual browser storage, downloads and offline reload; it is not part of the app's runtime dependencies.
+
+## Safe rename and backward compatibility
+
+See [RENIZ rename and migration notes](docs/RENIZ_RENAME_TR.md). Old `.artpulse.json` exports can still be imported; new exports use `.reniz.json`. The earlier `docs/evidence` and historical platform/test reports describe **ARTPULSE v0.1.0**, not newly-run RENIZ tests.

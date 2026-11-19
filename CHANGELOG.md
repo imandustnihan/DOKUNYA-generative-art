@@ -1,3 +1,11 @@
+# RENIZ v0.1.1+2 — source rebrand (not a compiled release)
+
+- New memorable name: **RENIZ** (*renk* + *iz*).
+- Updated Flutter package, app names and visual branding across platforms.
+- New export filenames `.reniz.json`; legacy `.artpulse.json` remain importable.
+- Retained original installed application identifiers and local storage to protect existing work.
+- Previous builds are not renamed binaries. New builds still require validation.
+
 # Changelog
 
 ## 0.1.0 — 2026-11-19

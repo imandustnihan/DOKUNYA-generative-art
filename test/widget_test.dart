@@ -3,14 +3,14 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:artpulse/app/artpulse_app.dart';
-import 'package:artpulse/app/studio_controller.dart';
-import 'package:artpulse/core/graphics/art_model.dart';
-import 'package:artpulse/core/graphics/art_engine.dart';
-import 'package:artpulse/core/performance/quality.dart';
-import 'package:artpulse/core/graphics/art_painter.dart';
-import 'package:artpulse/core/storage/key_value_store.dart';
-import 'package:artpulse/core/storage/project_repository.dart';
+import 'package:reniz/app/reniz_app.dart';
+import 'package:reniz/app/studio_controller.dart';
+import 'package:reniz/core/graphics/art_model.dart';
+import 'package:reniz/core/graphics/art_engine.dart';
+import 'package:reniz/core/performance/quality.dart';
+import 'package:reniz/core/graphics/art_painter.dart';
+import 'package:reniz/core/storage/key_value_store.dart';
+import 'package:reniz/core/storage/project_repository.dart';
 
 Future<StudioController> boot(
   WidgetTester tester, {
@@ -26,7 +26,7 @@ Future<StudioController> boot(
     animate: animate,
   );
   await c.load();
-  await tester.pumpWidget(ArtPulseApp(controller: c));
+  await tester.pumpWidget(RenizApp(controller: c));
   if (animate) {
     await tester.pump(const Duration(milliseconds: 32));
   } else {

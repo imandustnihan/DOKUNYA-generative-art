@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import 'app/artpulse_app.dart';
+import 'app/reniz_app.dart';
 import 'app/studio_controller.dart';
 import 'app/theme.dart';
 import 'core/storage/store.dart';
@@ -25,20 +25,21 @@ Future<void> main() async {
   } catch (_) {
     /* A normal OS window is still usable. */
   }
-  await launchArtPulse();
+  await launchReniz();
 }
 
-Future<void> launchArtPulse() async {
+Future<void> launchReniz() async {
   try {
     final store = await createStore();
     final controller = StudioController(ProjectRepository(store));
-    const forceTv = bool.fromEnvironment('ARTPULSE_TV');
+    const forceTv = bool.fromEnvironment('RENIZ_TV') ||
+        bool.fromEnvironment('ARTPULSE_TV');
     await controller.load(
       television: forceTv || await detectTv(),
       deviceLanguage:
           WidgetsBinding.instance.platformDispatcher.locale.languageCode,
     );
-    runApp(ArtPulseApp(controller: controller));
+    runApp(RenizApp(controller: controller));
     await controller.loadShader();
   } catch (_) {
     final language =
@@ -62,7 +63,7 @@ Future<void> launchArtPulse() async {
                     Text(t('startupError'), textAlign: TextAlign.center),
                     const SizedBox(height: 24),
                     FilledButton(
-                      onPressed: launchArtPulse,
+                      onPressed: launchReniz,
                       child: Text(t('retry')),
                     ),
                   ],

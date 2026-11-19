@@ -1,4 +1,8 @@
-# ARTPULSE 0.1.0
+# RENIZ 0.1.1+2 — source rename, pending build and tests
+
+The previous ARTPULSE v0.1.0 packages are historical. This version includes a new display name and does not claim new tested packages yet. See `docs/RENIZ_RENAME_TR.md`.
+
+# ARTPULSE 0.1.0 (historical release candidate)
 
 An offline generative art studio with five interactive modes, local editable projects, PNG export, six palettes, ten presets, three interface languages and adaptive controls.
 

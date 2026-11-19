@@ -16,14 +16,14 @@ import '../features/presets/presets.dart';
 import 'studio_controller.dart';
 import 'theme.dart';
 
-class ArtPulseApp extends StatelessWidget {
-  const ArtPulseApp({super.key, required this.controller});
+class RenizApp extends StatelessWidget {
+  const RenizApp({super.key, required this.controller});
   final StudioController controller;
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: controller,
     builder: (context, _) => MaterialApp(
-      title: 'ARTPULSE',
+      title: 'RENIZ',
       debugShowCheckedModeBanner: false,
       theme: artTheme(tv: controller.tv),
       locale: Locale(controller.locale),
@@ -141,11 +141,11 @@ class _WorkspaceState extends State<Workspace> {
         id: c.projectId ?? 'art_export',
         name: c.name,
       );
-      final name = 'ARTPULSE_${doc.seed}';
+      final name = 'RENIZ_${doc.seed}';
       if (project) {
         final ok = await exportBytes(
           Uint8List.fromList(utf8.encode(ProjectCodec.encode(doc))),
-          '$name.artpulse.json',
+          '$name.reniz.json',
           'application/json',
           _shareOrigin(),
         );
@@ -183,7 +183,7 @@ class _WorkspaceState extends State<Workspace> {
   Future<void> _import() async {
     try {
       const group = XTypeGroup(
-        label: 'ARTPULSE JSON',
+        label: 'RENIZ / ARTPULSE JSON',
         extensions: ['json'],
         mimeTypes: ['application/json'],
         uniformTypeIdentifiers: ['public.json'],
@@ -407,7 +407,7 @@ class _WorkspaceState extends State<Workspace> {
         const SizedBox(width: 10),
         const Flexible(
           child: Text(
-            'ARTPULSE',
+            'RENIZ',
             maxLines: 1,
             style: TextStyle(
               fontSize: 17,
@@ -1399,7 +1399,7 @@ class _WorkspaceState extends State<Workspace> {
           TextButton.icon(
             onPressed: () => showLicensePage(
               context: context,
-              applicationName: 'ARTPULSE',
+              applicationName: 'RENIZ',
               applicationVersion: '0.1.0',
             ),
             icon: const Icon(Icons.code, size: 18),

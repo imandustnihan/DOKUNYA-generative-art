@@ -1,4 +1,4 @@
-"""Build original ARTPULSE vector-mark assets; no external artwork."""
+"""Build original RENIZ vector-mark assets; no external artwork."""
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 import math
@@ -45,7 +45,7 @@ base.save(root/'windows/runner/resources/app_icon.ico',sizes=[(16,16),(32,32),(4
 base.save(root/'assets/app_icon.png')
 banner=Image.new('RGB',(1280,720),'#0b0c12');banner.paste(base.resize((500,500)),(40,110))
 bd=ImageDraw.Draw(banner);font=ImageFont.truetype(str(root/'assets/fonts/NotoSans-Bold.ttf'),88)
-bd.text((560,275),'ARTPULSE',font=font,fill='#eeedf5')
+bd.text((560,275),'RENIZ',font=font,fill='#eeedf5')
 font=ImageFont.truetype(str(root/'assets/fonts/NotoSans-Regular.ttf'),28)
 bd.text((566,390),'GENERATIVE ART STUDIO',font=font,fill='#9494aa')
 p=root/'android/app/src/main/res/drawable-nodpi/tv_banner.png';p.parent.mkdir(exist_ok=True)
