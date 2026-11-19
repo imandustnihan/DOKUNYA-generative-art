@@ -32,16 +32,16 @@ void main() {
     expect(listed, hasLength(1));
     expect(listed.single.name, 'ARTPULSE original');
   });
-  test('DOKUNYA imports prior RENIZ JSON without modifying schema', () {
+  test('DOKUNYA imports previous-release JSON without modifying schema', () {
     final engine = ArtEngine();
     engine.begin(4, .1, .2, .5);
     engine.move(4, .7, .9, .8);
     engine.end(4);
-    final prior = engine.snapshot(id: 'reniz-saved', name: 'RENIZ sample');
+    final prior = engine.snapshot(id: 'legacy-v011-saved', name: 'Legacy v0.1.1 sample');
     final bytes = ProjectCodec.encode(prior);
     final imported = ProjectCodec.decode(bytes);
-    expect(imported.id, 'reniz-saved');
-    expect(imported.name, 'RENIZ sample');
+    expect(imported.id, 'legacy-v011-saved');
+    expect(imported.name, 'Legacy v0.1.1 sample');
     expect(imported.strokes.length, prior.strokes.length);
   });
 }
