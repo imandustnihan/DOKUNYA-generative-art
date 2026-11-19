@@ -8,6 +8,16 @@
 
 # Changelog
 
+## Unreleased — 100-instrument catalog
+
+- Ten mathematical drawing families with 100 stable variations, real live previews and search.
+- Local favorite instruments with persistence, filtering and language labels in TR/AZ/EN.
+- JSON backward compatibility; five original drawing modes unchanged.
+- Responsive engine launcher for narrow screens and accessibility text scaling.
+- Widget coverage for favorites, 100 distinct PNG outputs, and updated reviewed visual golden baselines.
+- Source remains open under MIT; no passwords or encrypted private archives published.
+
+
 ## 0.1.0 — 2026-11-19
 
 - Five interactive art engines, ten presets and six palettes.
