@@ -1,0 +1,22 @@
+{
+  "name": "dokunya-web-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev --host",
+    "build": "astro build",
+    "check": "astro check",
+    "lint": "node scripts/lint.mjs",
+    "verify": "node scripts/verify.mjs",
+    "preview": "astro preview --host"
+  },
+  "devDependencies": {
+    "astro": "7.4.9",
+    "@astrojs/check": "0.9.6",
+    "typescript": "5.9.3"
+  }
+}
