@@ -1,0 +1,18 @@
+---
+import Page from '../components/Page.astro';
+import { languages, pages, type Language, type PageName } from '../data/content';
+
+export function getStaticPaths() {
+  return languages.flatMap((language) =>
+    pages
+      .filter((page) => !(language === 'tr' && page === 'home'))
+      .map((page) => ({
+        params: { slug: [language === 'tr' ? '' : language, page === 'home' ? '' : page].filter(Boolean).join('/') },
+        props: { language, page },
+      })),
+  );
+}
+
+const { language, page } = Astro.props as { language: Language; page: PageName };
+---
+<Page language={language} page={page} />

@@ -1,0 +1,101 @@
+name: DOKUNYA premium web verification
+on:
+  push:
+    branches:
+      - feature/dokunya-premium-web
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'lib/**'
+      - 'web/**'
+      - 'test/**'
+      - 'tool/**'
+      - '.github/workflows/pages.yml'
+      - '.github/workflows/web-platform-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: web-verify-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  CI: 'true'
+  FLUTTER_SUPPRESS_ANALYTICS: 'true'
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install site dependencies
+        run: npm --prefix site install --no-audit --no-fund
+      - run: npm --prefix site run lint
+      - run: npm --prefix site run check
+      - run: npm --prefix site run build
+        env:
+          DOKUNYA_BASE: /${{ github.event.repository.name }}/
+      - run: node site/scripts/verify.mjs
+        env:
+          DOKUNYA_BASE: /${{ github.event.repository.name }}/
+
+  integration:
+    needs: site
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Flutter 3.50.0
+        shell: bash
+        run: |
+          git clone --depth 1 --branch 3.50.0 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - run: npm --prefix site install --no-audit --no-fund
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: flutter analyze
+      - run: flutter test --reporter expanded
+      - name: Build static website and real Flutter Studio
+        shell: bash
+        env:
+          DOKUNYA_BASE: /${{ github.event.repository.name }}/
+        run: |
+          set -euo pipefail
+          npm --prefix site run build
+          flutter build web --release --no-web-resources-cdn --base-href "$DOKUNYA_BASE"studio/
+          python3 tool/prepare_web.py
+          mkdir -p site/dist/studio site/dist/media
+          cp -a build/web/. site/dist/studio/
+          cp test/goldens/desktop.png site/dist/media/studio-preview.png
+          cp web/favicon.png site/dist/favicon.png
+          node site/scripts/post_build.mjs
+          node site/scripts/verify.mjs --with-studio
+      - name: Install headless Chromium
+        shell: bash
+        run: |
+          cd site
+          npx playwright install --with-deps chromium
+      - name: Test pages and real embedded Flutter engine in Chromium
+        env:
+          DOKUNYA_BASE: /${{ github.event.repository.name }}/
+        run: node site/scripts/site_smoke.mjs
+      - name: Test Studio drawing, storage, PNG, languages and PWA offline
+        shell: bash
+        env:
+          DOKUNYA_WEB_BASE: /${{ github.event.repository.name }}/studio/
+        run: |
+          NODE_PATH="$PWD/site/node_modules" node tool/web_smoke.cjs site/dist/studio
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: premium-web-build-and-browser-evidence
+          path: |
+            site/dist
+            build/browser-evidence
+          retention-days: 7
+          if-no-files-found: warn

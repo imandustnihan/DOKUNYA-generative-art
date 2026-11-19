@@ -1,0 +1,21 @@
+---
+import Shell from '../layouts/Shell.astro';
+import { route } from '../data/content';
+
+const home = route('en', 'home', import.meta.env.BASE_URL);
+---
+<Shell language="en" page="home" title="Page not found" description="The requested DOKUNYA page does not exist. Return to the creative studio.">
+  <main id="main">
+    <section class="page-section wrap narrow">
+      <div class="page-intro">
+        <span class="eyebrow">404 / DOKUNYA</span>
+        <h1>Page not found.</h1>
+        <p class="lead">This address is not part of the current DOKUNYA website. Your artwork remains in your browser; return to the home page or open the studio.</p>
+        <div class="hero-buttons">
+          <a class="button button-primary" href={home}>Back to DOKUNYA <span aria-hidden="true">→</span></a>
+          <a class="button button-quiet" href={import.meta.env.BASE_URL + 'studio/'}>Open Studio <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Shell>
