@@ -30,7 +30,7 @@ jobs:
           flutter test
           flutter build web --release --no-web-resources-cdn --base-href "/$REPOSITORY_NAME/"
           python3 tool/prepare_web.py
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: build/web
   deploy:
