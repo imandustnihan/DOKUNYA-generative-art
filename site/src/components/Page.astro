@@ -1,0 +1,137 @@
+---
+import Shell from '../layouts/Shell.astro';
+import { copy, modeNames, route, type Language, type PageName } from '../data/content';
+
+interface Props { language: Language; page: PageName }
+const { language, page } = Astro.props;
+const tx = copy[language];
+const base = import.meta.env.BASE_URL;
+const studioHref = base + 'studio/';
+const modeDescription = (i: number) => tx.modeDescriptions[i];
+const pageDetails: Record<PageName, [string, string]> = {
+  home: [tx.heroTitle, tx.heroBody],
+  discover: [tx.discoverTitle, tx.discoverLead],
+  guide: [tx.guideTitle, tx.guideLead],
+  about: [tx.aboutTitle, tx.aboutLead],
+  privacy: [tx.privacyTitle, tx.privacyLead],
+};
+const [heading, description] = pageDetails[page];
+---
+<Shell language={language} page={page} title={heading} description={description}>
+  <main id="main">
+    {page === 'home' && (
+      <>
+        <section class="hero wrap">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="signal"></span>{tx.eyebrow}</div>
+            <h1>{tx.heroTitle}</h1>
+            <p class="lead">{tx.heroBody}</p>
+            <div class="hero-buttons">
+              <a class="button button-primary" href={studioHref}>{tx.start}<span aria-hidden="true">↗</span></a>
+              <a class="button button-quiet" href={route(language, 'discover', base)}>{tx.explore}<span aria-hidden="true">→</span></a>
+            </div>
+            <p class="hero-footnote"><span class="tiny-check" aria-hidden="true">✓</span>{tx.privacyPill}</p>
+          </div>
+          <div class="hero-visual" aria-label={tx.visualLabel}>
+            <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+            <div class="visual-rail"><span>THE CREATIVE SPACE</span><span>001 — 005</span></div>
+            <div class="visual-frame">
+              <img src={base + 'media/studio-preview.png'} alt={tx.visualLabel} width="1440" height="900" fetchpriority="high" decoding="async" />
+            </div>
+            <div class="visual-bottom"><span class="pulse-dot"></span> DOKUNYA STUDIO <span>FLUTTER / REAL ENGINE</span></div>
+          </div>
+        </section>
+        <div class="capability-strip" aria-label="DOKUNYA">
+          <div class="wrap strip-inner">{tx.strip.map((text, i) => <span><i aria-hidden="true">{String(i + 1).padStart(2, '0')}</i>{text}</span>)}</div>
+        </div>
+        <section class="section wrap" id="engines">
+          <div class="section-heading">
+            <div><div class="eyebrow">{tx.sectionLabel}</div><h2>{tx.sectionTitle}</h2></div>
+            <p>{tx.sectionBody}</p>
+          </div>
+          <div class="engine-grid">
+            {modeNames.map((mode, i) => (
+              <a class={'engine-card engine-' + i} href={studioHref} aria-label={mode}>
+                <div class="engine-illustration" aria-hidden="true"><span class="ring ring-1"></span><span class="ring ring-2"></span><span class="ring ring-3"></span><span class="engine-core"></span></div>
+                <span class="engine-number">0{i + 1} / 05</span>
+                <div class="engine-content"><h3>{mode}</h3><p>{modeDescription(i)}</p></div>
+                <span class="engine-arrow" aria-hidden="true">↗</span>
+              </a>
+            ))}
+          </div>
+        </section>
+        <section class="section wrap workflow">
+          <div class="section-heading"><div><div class="eyebrow">DOKUNYA / WORKFLOW</div><h2>{tx.workflowTitle}</h2></div></div>
+          <div class="workflow-grid">
+            {tx.workflowSteps.map((item) => (
+              <div class="workflow-step"><span>{item[0]}</span><p>{item[1]}</p></div>
+            ))}
+          </div>
+          <div class="live-box">
+            <div><span class="live-tag"><span class="pulse-dot"></span> LIVE ENGINE</span><h2>{tx.previewTitle}</h2><p>{tx.previewHelp}</p></div>
+            <button class="button button-primary" type="button" data-preview-open>{tx.preview}<span aria-hidden="true">↗</span></button>
+          </div>
+          <div class="live-preview" id="live-preview" hidden>
+            <div class="preview-bar"><strong>DOKUNYA STUDIO</strong><button type="button" data-preview-close>{tx.close} ×</button></div>
+            <iframe title={tx.previewTitle} loading="lazy" data-src={studioHref} allow="fullscreen" allowfullscreen></iframe>
+          </div>
+        </section>
+        <section class="closing wrap"><span class="eyebrow">PRIVATE BY DESIGN</span><h2>{tx.privacyPill}</h2><p>{tx.privacyNote}</p><a href={route(language, 'privacy', base)}>{tx.nav.privacy}<span aria-hidden="true"> ↗</span></a></section>
+      </>
+    )}
+    {page === 'discover' && (
+      <section class="page-section wrap">
+        <div class="page-intro"><span class="eyebrow">01 — 05 / ART ENGINES</span><h1>{tx.discoverTitle}</h1><p class="lead">{tx.discoverLead}</p></div>
+        <div class="discovery-grid">
+          {modeNames.map((mode, i) => (
+            <article class={'discovery-item engine-' + i}>
+              <div class="discovery-art" aria-hidden="true"><span class="ring ring-1"></span><span class="ring ring-2"></span><span class="ring ring-3"></span><span class="engine-core"></span></div>
+              <div class="discovery-details"><span class="engine-number">ENGINE 0{i + 1}</span><h2>{mode}</h2><p>{modeDescription(i)}</p><a class="inline-link" href={studioHref}>{tx.start}<span aria-hidden="true">↗</span></a></div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+    {page === 'guide' && (
+      <section class="page-section wrap">
+        <div class="page-intro"><span class="eyebrow">DOKUNYA / DOCUMENTATION</span><h1>{tx.guideTitle}</h1><p class="lead">{tx.guideLead}</p></div>
+        <div class="guide-grid">{tx.guideItems.map((item, i) => <article class="info-panel"><span class="info-index">0{i + 1}</span><h2>{item[0]}</h2><p>{item[1]}</p></article>)}</div>
+        <div class="page-action"><a class="button button-primary" href={studioHref}>{tx.start} ↗</a></div>
+      </section>
+    )}
+    {page === 'about' && (
+      <section class="page-section wrap narrow">
+        <div class="page-intro"><span class="eyebrow">ABOUT / DOKUNYA</span><h1>{tx.aboutTitle}</h1><p class="lead">{tx.aboutLead}</p></div>
+        <div class="editorial"><p>{tx.aboutBody}</p><p>{tx.aboutFoot}</p></div>
+        <div class="page-action"><a class="button button-primary" href={studioHref}>{tx.start} ↗</a></div>
+      </section>
+    )}
+    {page === 'privacy' && (
+      <section class="page-section wrap">
+        <div class="page-intro"><span class="eyebrow">DATA / PRIVACY</span><h1>{tx.privacyTitle}</h1><p class="lead">{tx.privacyLead}</p></div>
+        <div class="guide-grid">{tx.privacyItems.map((item, i) => <article class="info-panel"><span class="info-index">0{i + 1}</span><h2>{item[0]}</h2><p>{item[1]}</p></article>)}</div>
+        <p class="endnote">{tx.privacyNote}</p>
+      </section>
+    )}
+  </main>
+  {page === 'home' && (
+    <script>
+      const open = document.querySelector<HTMLButtonElement>('[data-preview-open]');
+      const close = document.querySelector<HTMLButtonElement>('[data-preview-close]');
+      const frame = document.querySelector<HTMLIFrameElement>('#live-preview iframe');
+      const panel = document.querySelector<HTMLElement>('#live-preview');
+      open?.addEventListener('click', () => {
+        if (!panel || !frame) return;
+        panel.hidden = false;
+        if (!frame.src) frame.src = frame.dataset.src || '';
+        close?.focus();
+        panel.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      });
+      close?.addEventListener('click', () => {
+        if (panel) panel.hidden = true;
+        if (frame) frame.removeAttribute('src');
+        open?.focus();
+      });
+    </script>
+  )}
+</Shell>

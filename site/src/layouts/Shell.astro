@@ -1,0 +1,98 @@
+---
+import '../styles/global.css';
+import { copy, languages, route, type Language, type PageName } from '../data/content';
+
+interface Props {
+  language: Language;
+  page: PageName;
+  title: string;
+  description: string;
+}
+const { language, page, title, description } = Astro.props;
+const tx = copy[language];
+const base = import.meta.env.BASE_URL;
+const origin = 'https://imandustnihan.github.io';
+const canonical = new URL(route(language, page, base), origin).href;
+const cardImage = new URL(base + 'media/studio-preview.png', origin).href;
+const navItems: PageName[] = ['home', 'discover', 'guide', 'about', 'privacy'];
+const studioHref = base + 'studio/';
+---
+<!doctype html>
+<html lang={language}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0B0C12" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href={canonical} />
+    {languages.map((lang) => (
+      <link rel="alternate" hreflang={lang} href={new URL(route(lang, page, base), origin).href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={new URL(route('tr', page, base), origin).href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={cardImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href={base + 'favicon.png'} type="image/png" />
+    <title>{title} · DOKUNYA</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="site-shell">
+      <header class="header">
+        <a class="brand" href={route(language, 'home', base)} aria-label="DOKUNYA">
+          <span class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-name">DOKUNYA<span class="brand-dot">.</span></span>
+        </a>
+        <nav class="nav-main" aria-label={tx.menu}>
+          {navItems.slice(0, 4).map((item) => (
+            <a href={route(language, item, base)} aria-current={page === item ? 'page' : undefined}>{tx.nav[item]}</a>
+          ))}
+        </nav>
+        <div class="header-actions">
+          <div class="language-switch" aria-label="Language">
+            {languages.map((lang) => (
+              <a href={route(lang, page, base)} lang={lang} hreflang={lang} aria-current={lang === language ? 'page' : undefined} data-language-choice={lang}>{lang.toUpperCase()}</a>
+            ))}
+          </div>
+          <a class="header-studio" href={studioHref}>{tx.nav.studio}<span aria-hidden="true">↗</span></a>
+        </div>
+        <details class="mobile-nav">
+          <summary aria-label={tx.menu}><span></span><span></span><span></span></summary>
+          <nav aria-label={tx.menu}>
+            {navItems.map((item) => (
+              <a href={route(language, item, base)} aria-current={page === item ? 'page' : undefined}>{tx.nav[item]}</a>
+            ))}
+            <a href={studioHref}>{tx.nav.studio}</a>
+            <div class="mobile-languages">
+              {languages.map((lang) => <a href={route(lang, page, base)} lang={lang} data-language-choice={lang}>{lang.toUpperCase()}</a>)}
+            </div>
+          </nav>
+        </details>
+      </header>
+      <slot />
+      <footer class="footer">
+        <div class="footer-top">
+          <div><a class="footer-logo" href={route(language, 'home', base)}>DOKUNYA<span>.</span></a><p>{tx.footer}</p></div>
+          <div class="footer-links">
+            <a href={route(language, 'guide', base)}>{tx.nav.guide}</a>
+            <a href={route(language, 'privacy', base)}>{tx.nav.privacy}</a>
+            <a href="https://github.com/imandustnihan/DOKUNYA-generative-art" target="_blank" rel="noopener noreferrer">{tx.github}</a>
+          </div>
+        </div>
+        <div class="footer-bottom"><span>© DOKUNYA · MIT OPEN SOURCE</span><span>{tx.notice}</span></div>
+      </footer>
+    </div>
+    <script>
+      document.querySelectorAll<HTMLAnchorElement>('[data-language-choice]').forEach((link) => {
+        link.addEventListener('click', () => {
+          try { localStorage.setItem('dokunya-site-language', link.dataset.languageChoice || 'tr'); } catch { /* Storage is optional. */ }
+        });
+      });
+    </script>
+  </body>
+</html>
