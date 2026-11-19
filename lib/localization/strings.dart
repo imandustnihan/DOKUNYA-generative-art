@@ -208,7 +208,8 @@ class ArtStrings {
       'unsaved': 'Kaydedilmemiş değişiklikler',
       'draftRecovered': 'Tamamlanmamış çizim kurtarıldı',
       'draftSaveFailed': 'Otomatik kayıt başarısız. Projeyi elle kaydet.',
-      'draftCorrupt': 'Bir taslak açılamadı. Orijinal veriler silinmeden korundu.',
+      'draftCorrupt':
+          'Bir taslak açılamadı. Orijinal veriler silinmeden korundu.',
       'local': 'Yerel kayıt',
       'shortcuts': 'Klavye kısayolları',
       'shortcutHelp': 'Boşluk: duraklat · F: odak · C: temizle · R: varyasyon · Ctrl/Cmd+S: kaydet · Ctrl/Cmd+Z: geri al · 0: görünüm',
@@ -324,7 +325,8 @@ class ArtStrings {
       'unsaved': 'Saxlanılmamış dəyişikliklər',
       'draftRecovered': 'Yarımçıq rəsm bərpa edildi',
       'draftSaveFailed': 'Avtomatik saxlama alınmadı. Layihəni əl ilə saxla.',
-      'draftCorrupt': 'Qaralama açılmadı. İlkin məlumatlar silinmədən saxlanıldı.',
+      'draftCorrupt':
+          'Qaralama açılmadı. İlkin məlumatlar silinmədən saxlanıldı.',
       'local': 'Yerli yaddaş',
       'shortcuts': 'Klaviatura qısayolları',
       'shortcutHelp': 'Boşluq: dayandır · F: fokus · C: təmizlə · R: variasiya · Ctrl/Cmd+S: saxla · Ctrl/Cmd+Z: geri al · 0: görünüş',
