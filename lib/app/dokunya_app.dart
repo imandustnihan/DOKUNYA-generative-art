@@ -9,6 +9,7 @@ import 'package:material_ui/material_ui.dart';
 import '../core/graphics/art_engine.dart';
 import '../core/graphics/art_model.dart';
 import '../core/graphics/art_painter.dart';
+import '../core/graphics/engine_catalog.dart';
 import '../core/performance/quality.dart';
 import '../core/storage/platform_files.dart';
 import '../features/studio/art_canvas.dart';
@@ -577,6 +578,212 @@ class _WorkspaceState extends State<Workspace> {
         ),
     ],
   );
+  Future<void> _selectInstrument(int id) async {
+    if (!await _preserveWork()) return;
+    final current = c.engine.settings;
+    c.change(current.copyWith(
+      mode: ArtMode.neonFlow,
+      instrument: id,
+      autoArt: true,
+    ));
+    c.restart();
+    c.name = instrumentName(id);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _openEngineLibrary() async {
+    var family = -1;
+    var favoritesOnly = false;
+    var search = '';
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: const Color(0xff10111a),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (sheetContext, update) => FractionallySizedBox(
+          heightFactor: .94,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final columns = width >= 1150 ? 5 : width >= 760 ? 4 : width >= 460 ? 3 : 2;
+              final ids = List.generate(instrumentCount, (i) => i).where((id) {
+                final categoryMatches = family < 0 || id ~/ 10 == family;
+                final queryMatches = search.isEmpty ||
+                    instrumentName(id).toLowerCase().contains(search) ||
+                    instrumentFamily(id).toLowerCase().contains(search);
+                return (!favoritesOnly || c.favoriteInstruments.contains(id)) &&
+                    categoryMatches && queryMatches;
+              }).toList();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.auto_awesome, color: accent),
+                        const SizedBox(width: 12),
+                        Expanded(child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(t('engineAtlas'), style: TextStyle(
+                              color: accent.withValues(alpha: .9),
+                              fontSize: 10, letterSpacing: 2.4, fontWeight: FontWeight.w800,
+                            )),
+                            Text(t('engineWorlds'), style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.w700,
+                            )),
+                          ],
+                        )),
+                        IconButton(
+                          onPressed: () => Navigator.pop(sheetContext),
+                          tooltip: t('engineClose'),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: TextField(
+                      key: const ValueKey('engine_search'),
+                      onChanged: (value) => update(() => search = value.trim().toLowerCase()),
+                      decoration: InputDecoration(
+                        hintText: t('engineSearch'),
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: const Color(0xff1d1e2a),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 56,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      children: [
+                        ChoiceChip(
+                          key: const ValueKey('engine_favorites_chip'),
+                          avatar: const Icon(Icons.favorite, size: 16),
+                          label: Text("${t('engineFavorites')} (${c.favoriteInstruments.length})"),
+                          selected: favoritesOnly,
+                          onSelected: (selected) => update(() => favoritesOnly = selected),
+                        ),
+                        const SizedBox(width: 8),
+                        for (var i = -1; i < engineFamilies.length; i++) ...[
+                          ChoiceChip(
+                            label: Text(i == -1 ? t('engineAll') : engineFamilies[i]),
+                            selected: family == i,
+                            onSelected: (_) => update(() => family = i),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ids.isEmpty
+                        ? Center(child: Text(t('engineEmpty')))
+                        : GridView.builder(
+                            key: const ValueKey('engine_grid'),
+                            padding: const EdgeInsets.all(18),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: columns,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: width < 460 ? .81 : .85,
+                            ),
+                            itemCount: ids.length,
+                            itemBuilder: (context, index) {
+                              final id = ids[index];
+                              final selected = c.engine.settings.instrument == id;
+                              return InkWell(
+                                key: ValueKey('instrument_$id'),
+                                onTap: () async {
+                                  Navigator.pop(sheetContext);
+                                  await _selectInstrument(id);
+                                },
+                                borderRadius: BorderRadius.circular(15),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xff1b1b28),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(color: selected ? accent : const Color(0xff353044)),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                                              child: _InstrumentThumbnail(key: ValueKey('preview_$id'), id: id),
+                                            ),
+                                            Positioned(
+                                              top: 5,
+                                              right: 5,
+                                              child: Material(
+                                                color: const Color(0xb710111a),
+                                                shape: const CircleBorder(),
+                                                child: IconButton(
+                                                  key: ValueKey('favorite_$id'),
+                                                  tooltip: t('engineFavoriteToggle'),
+                                                  visualDensity: VisualDensity.compact,
+                                                  iconSize: 19,
+                                                  icon: Icon(
+                                                    c.favoriteInstruments.contains(id)
+                                                        ? Icons.favorite : Icons.favorite_border,
+                                                    color: c.favoriteInstruments.contains(id)
+                                                        ? accent : Colors.white,
+                                                  ),
+                                                  onPressed: () => _guard(() async {
+                                                    await c.toggleFavoriteInstrument(id);
+                                                    if (sheetContext.mounted) update(() {});
+                                                  }),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(11, 9, 8, 11),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(instrumentName(id), maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
+                                            Text('${(id + 1).toString().padLeft(3, '0')} · ${instrumentFamily(id)}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(color: muted, fontSize: 9)),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _studio() => LayoutBuilder(
     builder: (context, bounds) {
       final large = bounds.maxWidth >= 1230, wide = bounds.maxWidth >= 930;
@@ -598,8 +805,9 @@ class _WorkspaceState extends State<Workspace> {
                         child: PopupMenuButton<ArtMode>(
                           key: const ValueKey('mode_picker'),
                           tooltip: t('modes'),
-                          onSelected: (mode) =>
-                              c.change(c.engine.settings.copyWith(mode: mode)),
+                          onSelected: (mode) => c.change(
+                            c.engine.settings.copyWith(mode: mode, instrument: -1),
+                          ),
                           itemBuilder: (context) => [
                             for (final mode in ArtMode.values)
                               PopupMenuItem(
@@ -622,7 +830,9 @@ class _WorkspaceState extends State<Workspace> {
                                 const SizedBox(width: 8),
                                 Flexible(
                                   child: Text(
-                                    modeNames[c.engine.settings.mode.index],
+                                    c.engine.settings.instrument >= 0
+                                        ? instrumentName(c.engine.settings.instrument)
+                                        : modeNames[c.engine.settings.mode.index],
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -642,6 +852,16 @@ class _WorkspaceState extends State<Workspace> {
                           ),
                         ),
                       ),
+                      Tooltip(
+                        message: t('engineExplore'),
+                        child: FilledButton.tonalIcon(
+                          key: const ValueKey('engine_library_open'),
+                          onPressed: _openEngineLibrary,
+                          icon: const Icon(Icons.auto_awesome_mosaic_outlined, size: 18),
+                          label: Text(t('engineLibrary')),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       _icon(
                         Icons.center_focus_strong,
                         'viewReset',
@@ -771,20 +991,32 @@ class _WorkspaceState extends State<Workspace> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       _section(t('modes')),
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
+      SizedBox(
+        width: double.infinity,
+        child: FilledButton.tonalIcon(
+          onPressed: _openEngineLibrary,
+          icon: const Icon(Icons.auto_awesome_mosaic_outlined, size: 17),
+          label: Text(t('engineExplore')),
+        ),
+      ),
+      const SizedBox(height: 8),
       Expanded(
         child: ListView.separated(
           itemCount: ArtMode.values.length,
           separatorBuilder: (_, i) => const SizedBox(height: 10),
           itemBuilder: (context, i) {
             final mode = ArtMode.values[i],
-                selected = c.engine.settings.mode == mode;
+                selected = c.engine.settings.mode == mode &&
+                    c.engine.settings.instrument < 0;
             return Semantics(
               selected: selected,
               child: InkWell(
                 key: ValueKey('mode_${modeIds[i]}'),
                 borderRadius: BorderRadius.circular(14),
-                onTap: () => c.change(c.engine.settings.copyWith(mode: mode)),
+                onTap: () => c.change(
+                  c.engine.settings.copyWith(mode: mode, instrument: -1),
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(9),
                   decoration: BoxDecoration(
@@ -1142,7 +1374,96 @@ class _WorkspaceState extends State<Workspace> {
               label: Text(t('openStudio')),
             ),
           ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 27),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(21),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xff29203b), Color(0xff131a2b), Color(0xff12121c)],
+              ),
+              border: Border.all(color: const Color(0xff62517b)),
+            ),
+            child: Wrap(
+              spacing: 20,
+              runSpacing: 14,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t('engineAtlas'), style: const TextStyle(
+                      color: accent, fontSize: 11, letterSpacing: 2,
+                      fontWeight: FontWeight.w700)),
+                    SizedBox(height: 12),
+                    Text(t('engineWorlds'), style: const TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.w800)),
+                    SizedBox(height: 6),
+                    Text(t('engineSummary'),
+                      style: const TextStyle(color: Color(0xffb2a9c7), fontSize: 12)),
+                  ],
+                ),
+                FilledButton.icon(
+                  key: const ValueKey('home_engine_atlas'),
+                  onPressed: _openEngineLibrary,
+                  icon: const Icon(Icons.auto_awesome_mosaic_outlined),
+                  label: Text(t('engineExplore')),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 33),
+          Row(children: [
+            Expanded(child: Text(t('engineFeatured'), style:
+              const TextStyle(fontSize: 19, fontWeight: FontWeight.w700))),
+            TextButton(onPressed: _openEngineLibrary, child: Text(t('engineAll') + ' →')),
+          ]),
+          const SizedBox(height: 14),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 10,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              mainAxisExtent: bounds.maxWidth < 600 ? 200 : 235,
+            ),
+            itemBuilder: (context, i) {
+              final id = i * 10;
+              return InkWell(
+                key: ValueKey('home_instrument_$id'),
+                onTap: () => _selectInstrument(id),
+                borderRadius: BorderRadius.circular(15),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: surface,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: line),
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Expanded(child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                      child: _InstrumentThumbnail(key: ValueKey('featured_$id'), id: id),
+                    )),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(13, 10, 12, 12),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(instrumentName(id), style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w700)),
+                        Text(instrumentFamily(id), style: const TextStyle(
+                          color: muted, fontSize: 10)),
+                      ]),
+                    ),
+                  ]),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 40),
           Text(t('curated'), style: const TextStyle(fontSize: 17)),
           const SizedBox(height: 16),
           GridView.builder(
@@ -1250,7 +1571,9 @@ class _WorkspaceState extends State<Workspace> {
                 final d = c.documents[i];
                 return _artCard(
                   title: d.name,
-                  subtitle: modeNames[d.settings.mode.index],
+                  subtitle: d.settings.instrument >= 0
+                      ? instrumentName(d.settings.instrument)
+                      : modeNames[d.settings.mode.index],
                   preview: _Preview(
                     mode: d.settings.mode,
                     palette: d.settings.palette,
@@ -1604,6 +1927,34 @@ class _PreviewState extends State<_Preview> {
     child: CustomPaint(
       painter: ArtPainter(_engine),
       child: const SizedBox.expand(),
+    ),
+  );
+}
+
+/// Lightweight preview uses the same procedural renderer as the full canvas.
+class _InstrumentThumbnail extends StatefulWidget {
+  const _InstrumentThumbnail({super.key, required this.id});
+  final int id;
+  @override
+  State<_InstrumentThumbnail> createState() => _InstrumentThumbnailState();
+}
+
+class _InstrumentThumbnailState extends State<_InstrumentThumbnail> {
+  late final ArtEngine engine = ArtEngine(
+    seed: 2749 + widget.id * 313,
+    settings: ArtSettings(
+      mode: ArtMode.neonFlow,
+      instrument: widget.id,
+      palette: (widget.id ~/ 10) % palettes.length,
+    ),
+  )..budget = QualityBudget.profiles[0]
+   ..time = 4.7;
+
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: CustomPaint(
+      painter: ArtPainter(engine),
+      size: Size.infinite,
     ),
   );
 }

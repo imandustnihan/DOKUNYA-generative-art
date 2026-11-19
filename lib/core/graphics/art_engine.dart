@@ -27,7 +27,7 @@ class ArtEngine {
   int get sampleCount => strokes.fold(0, (sum, s) => sum + s.points.length);
 
   void _fillInitial() {
-    if (!settings.autoArt) return;
+    if (!settings.autoArt || settings.instrument >= 0) return;
     for (
       var i = 0;
       i < math.min(120, budget.particles * settings.density).floor();
@@ -65,7 +65,7 @@ class ArtEngine {
     strokes.add(s);
     _active[id] = s;
     pointers[id] = (x, y);
-    if (settings.mode == ArtMode.particleGalaxy) {
+    if (settings.instrument < 0 && settings.mode == ArtMode.particleGalaxy) {
       for (var i = 0; i < 18; i++) {
         _spawn(x, y);
       }
@@ -94,7 +94,7 @@ class ArtEngine {
       ArtPoint(x, y, pressure.clamp(.1, 1), (dist / dt).clamp(0, 10), time),
     );
     pointers[id] = (x, y);
-    if (settings.mode == ArtMode.particleGalaxy) {
+    if (settings.instrument < 0 && settings.mode == ArtMode.particleGalaxy) {
       for (var i = 0; i < 4; i++) {
         _spawn(x, y);
       }
@@ -142,7 +142,7 @@ class ArtEngine {
     if (!seconds.isFinite || seconds <= 0) return;
     final dt = seconds.clamp(0, 1 / 15) * (.15 + settings.speed * 1.6);
     time += dt;
-    if (settings.mode != ArtMode.particleGalaxy) return;
+    if (settings.instrument >= 0 || settings.mode != ArtMode.particleGalaxy) return;
     final target = (budget.particles * settings.density).round();
     if (particleCount > target) particleCount = target;
     if (settings.autoArt) {

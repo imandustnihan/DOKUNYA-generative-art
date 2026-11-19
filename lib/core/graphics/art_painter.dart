@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'art_engine.dart';
 import 'art_math.dart';
 import 'art_model.dart';
+import 'procedural_instruments.dart';
 
 class ArtPainter extends CustomPainter {
   ArtPainter(
@@ -51,7 +52,9 @@ class ArtPainter extends CustomPainter {
     canvas.scale(zoomProvider?.call() ?? zoom);
     final s = engine.settings;
     final c = colors;
-    if (s.autoArt) {
+    if (s.autoArt && s.instrument >= 0) {
+      ProceduralInstruments.paint(canvas, size, engine, c);
+    } else if (s.autoArt) {
       switch (s.mode) {
         case ArtMode.neonFlow:
           _neon(canvas, size, c);
@@ -64,7 +67,7 @@ class ArtPainter extends CustomPainter {
         case ArtMode.geometryPulse:
           _geometry(canvas, size, c);
       }
-    } else if (s.mode == ArtMode.particleGalaxy) {
+    } else if (s.instrument < 0 && s.mode == ArtMode.particleGalaxy) {
       _galaxy(canvas, size, c);
     }
     _strokes(canvas, size, c);
@@ -329,7 +332,9 @@ class ArtPainter extends CustomPainter {
 
   void _strokes(Canvas canvas, Size size, List<Color> c) {
     final s = engine.settings;
-    final sectors = s.mode == ArtMode.symmetryLab ? s.symmetry : 1;
+    final sectors = s.instrument < 0 && s.mode == ArtMode.symmetryLab
+        ? s.symmetry
+        : 1;
     for (final stroke in engine.strokes) {
       for (var sector = 0; sector < sectors; sector++) {
         final angle =

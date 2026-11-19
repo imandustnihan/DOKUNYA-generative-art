@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import '../core/graphics/art_engine.dart';
 import '../core/graphics/art_model.dart';
+import '../core/graphics/engine_catalog.dart';
 import '../core/performance/quality.dart';
 import '../core/storage/project_repository.dart';
 import '../localization/strings.dart';
@@ -43,6 +44,8 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   bool dirty = false;
   WorkspacePage page = WorkspacePage.studio;
   List<ArtDocument> documents = [];
+  /// Locally persisted instrument favorites; never sent to a server.
+  final Set<int> favoriteInstruments = <int>{};
   String? projectId;
   String name = 'Untitled 01';
   double zoom = 1;
@@ -67,6 +70,13 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     final pref = await repository.preferences();
     final language = pref['locale'] ?? deviceLanguage;
     locale = ['en', 'tr', 'az'].contains(language) ? language as String : 'en';
+    // Treat preference files as untrusted: ignore malformed and out-of-range IDs.
+    final favorites = pref['favoriteInstruments'];
+    favoriteInstruments
+      ..clear()
+      ..addAll(favorites is List
+          ? favorites.whereType<int>().where((id) => id >= 0 && id < instrumentCount)
+          : const <int>[]);
     reducedMotion = pref['reducedMotion'] == true;
     tv = television || pref['tv'] == true;
     quality =
@@ -310,6 +320,30 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  Map<String, Object> _preferenceSnapshot() => {
+    'locale': locale,
+    'quality': quality.name,
+    'reducedMotion': reducedMotion,
+    'tv': tv,
+    'favoriteInstruments': (favoriteInstruments.toList()..sort()),
+  };
+
+  Future<void> toggleFavoriteInstrument(int id) async {
+    if (id < 0 || id >= instrumentCount) {
+      throw RangeError.range(id, 0, instrumentCount - 1);
+    }
+    if (!favoriteInstruments.add(id)) favoriteInstruments.remove(id);
+    notifyListeners();
+    try {
+      await repository.savePreferences(_preferenceSnapshot());
+    } catch (_) {
+      // Avoid showing a favorite that has not been stored successfully.
+      if (!favoriteInstruments.add(id)) favoriteInstruments.remove(id);
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> preferences({
     String? language,
     Quality? profile,
@@ -323,12 +357,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     _setBudget();
     _syncTicker();
     notifyListeners();
-    await repository.savePreferences({
-      'locale': locale,
-      'quality': quality.name,
-      'reducedMotion': reducedMotion,
-      'tv': tv,
-    });
+    await repository.savePreferences(_preferenceSnapshot());
   }
 
   @override
