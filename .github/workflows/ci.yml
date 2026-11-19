@@ -25,7 +25,14 @@ jobs:
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
       - run: flutter --version
       - run: flutter pub get
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Verify Dart formatting (print corrective diff on failure)
+        shell: bash
+        run: |
+          if ! dart format --output=none --set-exit-if-changed .; then
+            dart format .
+            git diff -- lib test
+            exit 1
+          fi
       - run: flutter analyze
       - run: flutter test --reporter expanded
       - run: python3 tool/license_audit.py
