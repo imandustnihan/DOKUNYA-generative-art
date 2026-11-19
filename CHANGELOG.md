@@ -1,8 +1,8 @@
-# RENIZ v0.1.1+2 — source rebrand (not a compiled release)
+# DOKUNYA v0.1.2+3 — source rebrand (not a compiled release)
 
-- New memorable name: **RENIZ** (*renk* + *iz*).
+- User-selected name: **DOKUNYA** (*dokun* + *dünya*).
 - Updated Flutter package, app names and visual branding across platforms.
-- New export filenames `.reniz.json`; legacy `.artpulse.json` remain importable.
+- New export filenames `.dokunya.json`; legacy `.artpulse.json` and `.reniz.json` remain importable.
 - Retained original installed application identifiers and local storage to protect existing work.
 - Previous builds are not renamed binaries. New builds still require validation.
 

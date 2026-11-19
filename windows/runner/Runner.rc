@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "dev.artpulse" "\0"
-            VALUE "FileDescription", "RENIZ" "\0"
+            VALUE "FileDescription", "DOKUNYA" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "reniz" "\0"
+            VALUE "InternalName", "dokunya" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 dev.artpulse. All rights reserved." "\0"
-            VALUE "OriginalFilename", "reniz.exe" "\0"
-            VALUE "ProductName", "RENIZ" "\0"
+            VALUE "OriginalFilename", "dokunya.exe" "\0"
+            VALUE "ProductName", "DOKUNYA" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

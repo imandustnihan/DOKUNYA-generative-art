@@ -8,7 +8,7 @@ class MainFlutterWindow: NSWindow {
     self.contentViewController = flutterViewController
     self.setFrame(windowFrame, display: true)
 
-    self.title = "RENIZ"
+    self.title = "DOKUNYA"
     let channel = FlutterMethodChannel(name: "dev.artpulse/window", binaryMessenger: flutterViewController.engine.binaryMessenger)
     channel.setMethodCallHandler { [weak self] call, result in
       guard call.method == "fullscreen", let enabled = call.arguments as? Bool else {

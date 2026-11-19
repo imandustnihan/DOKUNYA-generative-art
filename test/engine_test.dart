@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reniz/core/graphics/art_engine.dart';
-import 'package:reniz/core/graphics/art_math.dart';
-import 'package:reniz/core/graphics/art_model.dart';
-import 'package:reniz/core/performance/quality.dart';
+import 'package:dokunya/core/graphics/art_engine.dart';
+import 'package:dokunya/core/graphics/art_math.dart';
+import 'package:dokunya/core/graphics/art_model.dart';
+import 'package:dokunya/core/performance/quality.dart';
 
 void main() {
   test(

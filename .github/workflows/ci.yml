@@ -87,13 +87,13 @@ jobs:
         run: |
           mkdir -p dist
           case '${{ matrix.target }}' in
-            android) cp build/app/outputs/flutter-apk/app-release.apk dist/RENIZ-android-devsigned.apk ;;
-            web) python3 -m zipfile -c dist/RENIZ-web.zip build/web/* ;;
-            linux) tar -czf dist/RENIZ-linux-x64.tar.gz -C build/linux/x64/release bundle ;;
-            windows) powershell -Command "Compress-Archive -Path 'build/windows/x64/runner/Release/*' -DestinationPath 'dist/RENIZ-windows-x64.zip'" ;;
+            android) cp build/app/outputs/flutter-apk/app-release.apk dist/DOKUNYA-android-devsigned.apk ;;
+            web) python3 -m zipfile -c dist/DOKUNYA-web.zip build/web/* ;;
+            linux) tar -czf dist/DOKUNYA-linux-x64.tar.gz -C build/linux/x64/release bundle ;;
+            windows) powershell -Command "Compress-Archive -Path 'build/windows/x64/runner/Release/*' -DestinationPath 'dist/DOKUNYA-windows-x64.zip'" ;;
             apple)
-              ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/RENIZ.app dist/RENIZ-macos-unsigned.zip
-              ditto -c -k --sequesterRsrc --keepParent build/ios/iphonesimulator/Runner.app dist/RENIZ-ios-simulator-only.zip ;;
+              ditto -c -k --sequesterRsrc --keepParent build/macos/Build/Products/Release/DOKUNYA.app dist/DOKUNYA-macos-unsigned.zip
+              ditto -c -k --sequesterRsrc --keepParent build/ios/iphonesimulator/Runner.app dist/DOKUNYA-ios-simulator-only.zip ;;
           esac
       - uses: actions/upload-artifact@v7
         with:
@@ -122,4 +122,4 @@ jobs:
         run: |
           cd release-assets
           sha256sum * > SHA256SUMS.txt
-          gh release create "$RELEASE_TAG" --verify-tag --title "RENIZ $RELEASE_TAG" --notes-file ../docs/RELEASE_NOTES.md ./*
+          gh release create "$RELEASE_TAG" --verify-tag --title "DOKUNYA $RELEASE_TAG" --notes-file ../docs/RELEASE_NOTES.md ./*

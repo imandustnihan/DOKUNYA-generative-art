@@ -13,7 +13,7 @@ One Flutter/Dart application supplies the six official platform runners. Android
 | `lib/core/storage` | Serialized writes, native recoverable files, browser IndexedDB and platform export |
 | `lib/app/studio_controller.dart` | UI-independent studio state, separate repaint clock, lifecycle handling |
 | `lib/features/studio` | Pointer/stylus/pinch/wheel interaction and isolated canvas |
-| `lib/app/artpulse_app.dart` | Workspace, navigation, inspector, gallery, presets, settings and export flows |
+| `lib/app/dokunya_app.dart` | Workspace, navigation, inspector, gallery, presets, settings and export flows |
 | `lib/localization` | Complete action/error labels in English, Turkish and Azerbaijani |
 
 The simulation and renderer do not rebuild the control tree on every frame. A repaint Listenable updates the retained painter directly; its Paint and palette are reused. Global state changes use the controller notifier. Static thumbnails use a low work budget and do not run their own tickers.

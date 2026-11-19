@@ -7,7 +7,7 @@ packages=json.loads(config.read_text())['packages']
 out=root/'docs/licenses';out.mkdir(parents=True,exist_ok=True)
 rows=[];missing=[]
 for p in sorted(packages,key=lambda p:p['name']):
- if p['name']=='reniz':continue
+ if p['name']=='dokunya':continue
  uri=urllib.parse.urljoin(config.as_uri(),p['rootUri'])
  directory=Path(urllib.parse.unquote(urllib.parse.urlsplit(uri).path))
  candidates=[]
@@ -24,7 +24,7 @@ for p in sorted(packages,key=lambda p:p['name']):
  else:kind='See complete notice'
  (out/(p['name']+'.txt')).write_text(text)
  rows.append((p['name'],directory.name,kind))
-body='''# Third-party notices\n\nGenerated from the resolved package set, including SDK and test/build dependencies. Original RENIZ code is MIT. Complete dependency notices are preserved in [docs/licenses](docs/licenses). The Flutter engine may include further notices; release bundles include Flutter's generated NOTICES and the app's licence page. No art from comparison repositories was copied.\n\nNoto Sans font files are distributed under the SIL Open Font License; see [the bundled font notice](assets/fonts/LICENSE.txt). The SDK-bundled Roboto web fallback is Apache-2.0; its full notice is in assets/fonts/Roboto_LICENSE.txt. Material icons come from the Flutter SDK's licensed assets.\n\n| Package | Resolved package directory | Licence family |\n| --- | --- | --- |\n'''
+body='''# Third-party notices\n\nGenerated from the resolved package set, including SDK and test/build dependencies. Original DOKUNYA code is MIT. Complete dependency notices are preserved in [docs/licenses](docs/licenses). The Flutter engine may include further notices; release bundles include Flutter's generated NOTICES and the app's licence page. No art from comparison repositories was copied.\n\nNoto Sans font files are distributed under the SIL Open Font License; see [the bundled font notice](assets/fonts/LICENSE.txt). The SDK-bundled Roboto web fallback is Apache-2.0; its full notice is in assets/fonts/Roboto_LICENSE.txt. Material icons come from the Flutter SDK's licensed assets.\n\n| Package | Resolved package directory | Licence family |\n| --- | --- | --- |\n'''
 body+='\n'.join('| '+ ' | '.join(row) +' |' for row in rows)+'\n'
 if missing:body+='\nUnresolved licences: '+', '.join(missing)+'\n'
 (root/'THIRD_PARTY_NOTICES.md').write_text(body)

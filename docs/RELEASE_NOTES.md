@@ -1,6 +1,6 @@
-# RENIZ 0.1.1+2 — source rename, pending build and tests
+# DOKUNYA 0.1.2+3 — source rename, pending build and tests
 
-The previous ARTPULSE v0.1.0 packages are historical. This version includes a new display name and does not claim new tested packages yet. See `docs/RENIZ_RENAME_TR.md`.
+The previous ARTPULSE v0.1.0 packages are historical. This version includes a new display name and does not claim new tested packages yet. See `docs/DOKUNYA_RENAME_TR.md`.
 
 # ARTPULSE 0.1.0 (historical release candidate)
 

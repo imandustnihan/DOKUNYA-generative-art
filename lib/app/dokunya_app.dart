@@ -16,14 +16,14 @@ import '../features/presets/presets.dart';
 import 'studio_controller.dart';
 import 'theme.dart';
 
-class RenizApp extends StatelessWidget {
-  const RenizApp({super.key, required this.controller});
+class DokunyaApp extends StatelessWidget {
+  const DokunyaApp({super.key, required this.controller});
   final StudioController controller;
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: controller,
     builder: (context, _) => MaterialApp(
-      title: 'RENIZ',
+      title: 'DOKUNYA',
       debugShowCheckedModeBanner: false,
       theme: artTheme(tv: controller.tv),
       locale: Locale(controller.locale),
@@ -141,11 +141,11 @@ class _WorkspaceState extends State<Workspace> {
         id: c.projectId ?? 'art_export',
         name: c.name,
       );
-      final name = 'RENIZ_${doc.seed}';
+      final name = 'DOKUNYA_${doc.seed}';
       if (project) {
         final ok = await exportBytes(
           Uint8List.fromList(utf8.encode(ProjectCodec.encode(doc))),
-          '$name.reniz.json',
+          '$name.dokunya.json',
           'application/json',
           _shareOrigin(),
         );
@@ -183,7 +183,7 @@ class _WorkspaceState extends State<Workspace> {
   Future<void> _import() async {
     try {
       const group = XTypeGroup(
-        label: 'RENIZ / ARTPULSE JSON',
+        label: 'DOKUNYA / RENIZ / ARTPULSE JSON',
         extensions: ['json'],
         mimeTypes: ['application/json'],
         uniformTypeIdentifiers: ['public.json'],
@@ -407,7 +407,7 @@ class _WorkspaceState extends State<Workspace> {
         const SizedBox(width: 10),
         const Flexible(
           child: Text(
-            'RENIZ',
+            'DOKUNYA',
             maxLines: 1,
             style: TextStyle(
               fontSize: 17,
@@ -1399,7 +1399,7 @@ class _WorkspaceState extends State<Workspace> {
           TextButton.icon(
             onPressed: () => showLicensePage(
               context: context,
-              applicationName: 'RENIZ',
+              applicationName: 'DOKUNYA',
               applicationVersion: '0.1.0',
             ),
             icon: const Icon(Icons.code, size: 18),

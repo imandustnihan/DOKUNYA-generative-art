@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:reniz/core/graphics/art_engine.dart';
-import 'package:reniz/core/graphics/art_model.dart';
-import 'package:reniz/core/performance/quality.dart';
+import 'package:dokunya/core/graphics/art_engine.dart';
+import 'package:dokunya/core/graphics/art_model.dart';
+import 'package:dokunya/core/performance/quality.dart';
 
 void main() {
   final rows = <Map<String, Object>>[];

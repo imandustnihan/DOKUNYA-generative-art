@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:reniz/core/graphics/art_engine.dart';
-import 'package:reniz/core/storage/key_value_store.dart';
-import 'package:reniz/core/storage/project_repository.dart';
-import 'package:reniz/core/storage/store_io.dart';
+import 'package:dokunya/core/graphics/art_engine.dart';
+import 'package:dokunya/core/storage/key_value_store.dart';
+import 'package:dokunya/core/storage/project_repository.dart';
+import 'package:dokunya/core/storage/store_io.dart';
 
 class FailingStore extends MemoryStore {
   bool fail = true;

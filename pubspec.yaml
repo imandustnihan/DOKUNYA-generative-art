@@ -1,7 +1,7 @@
-name: reniz
+name: dokunya
 description: An offline generative art studio for touch, pointer and remote input.
 publish_to: none
-version: 0.1.1+2
+version: 0.1.2+3
 environment:
   sdk: '>=3.14.0 <4.0.0'
   flutter: '>=3.50.0'
