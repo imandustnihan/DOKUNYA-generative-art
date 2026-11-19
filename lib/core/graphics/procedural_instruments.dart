@@ -16,21 +16,36 @@ import 'engine_catalog.dart';
 class ProceduralInstruments {
   ProceduralInstruments._();
 
-  static void paint(Canvas canvas, Size size, ArtEngine engine, List<Color> colors) {
+  static void paint(
+    Canvas canvas,
+    Size size,
+    ArtEngine engine,
+    List<Color> colors,
+  ) {
     final id = engine.settings.instrument;
     if (id < 0 || id >= instrumentCount || size.isEmpty) return;
     final painter = _InstrumentBrush(canvas, size, engine, colors, id);
     switch (id ~/ 10) {
-      case 0: painter.orbits();
-      case 1: painter.ribbons();
-      case 2: painter.geometry();
-      case 3: painter.flow();
-      case 4: painter.gardens();
-      case 5: painter.particles();
-      case 6: painter.optical();
-      case 7: painter.resonance();
-      case 8: painter.topography();
-      case 9: painter.kaleidoscope();
+      case 0:
+        painter.orbits();
+      case 1:
+        painter.ribbons();
+      case 2:
+        painter.geometry();
+      case 3:
+        painter.flow();
+      case 4:
+        painter.gardens();
+      case 5:
+        painter.particles();
+      case 6:
+        painter.optical();
+      case 7:
+        painter.resonance();
+      case 8:
+        painter.topography();
+      case 9:
+        painter.kaleidoscope();
     }
   }
 }
@@ -48,18 +63,30 @@ class _InstrumentBrush {
   double get density => engine.settings.density;
   double get short => size.shortestSide;
   double get seed => (engine.seed % 100003) / 100003;
-  double get px => engine.strokes.isEmpty ? .5 : engine.strokes.last.points.last.x;
-  double get py => engine.strokes.isEmpty ? .5 : engine.strokes.last.points.last.y;
+  double get px =>
+      engine.strokes.isEmpty ? .5 : engine.strokes.last.points.last.x;
+  double get py =>
+      engine.strokes.isEmpty ? .5 : engine.strokes.last.points.last.y;
   Offset point(double x, double y) => Offset(x * size.width, y * size.height);
   Offset polar(double angle, double radius, {double cx = .5, double cy = .5}) =>
       point(cx + radius * math.cos(angle), cy + radius * math.sin(angle));
   double rand(int n) {
-    final x = math.sin((n + id * 313 + engine.seed % 997) * 127.1) * 43758.5453123;
+    final x =
+        math.sin((n + id * 313 + engine.seed % 997) * 127.1) * 43758.5453123;
     return x - x.floorToDouble();
   }
-  Color color(int i, [double a = .7]) => colors[i % colors.length].withValues(alpha: a.clamp(0.0, 1.0).toDouble());
 
-  void path(Path p, int index, {double width = 1.2, double opacity = .68, bool glow = false, bool fill = false}) {
+  Color color(int i, [double a = .7]) =>
+      colors[i % colors.length].withValues(alpha: a.clamp(0.0, 1.0).toDouble());
+
+  void path(
+    Path p,
+    int index, {
+    double width = 1.2,
+    double opacity = .68,
+    bool glow = false,
+    bool fill = false,
+  }) {
     brush
       ..style = fill ? PaintingStyle.fill : PaintingStyle.stroke
       ..strokeWidth = width * short / 680
@@ -79,6 +106,7 @@ class _InstrumentBrush {
     brush.color = color(index, opacity);
     canvas.drawPath(p, brush);
   }
+
   void dot(Offset center, double radius, int colorIndex, double opacity) {
     brush
       ..shader = null
@@ -87,6 +115,7 @@ class _InstrumentBrush {
       ..color = color(colorIndex, opacity);
     canvas.drawCircle(center, radius * short / 680, brush);
   }
+
   // 00-09: parametric and dynamical orbits.
   void orbits() {
     final count = 11 + (density * 17).round();
@@ -109,10 +138,25 @@ class _InstrumentBrush {
           8 => .18 + .12 * math.sin(9 * u + t),
           _ => .12 + .08 * math.cos(6 * u) + .07 * math.sin(11 * u),
         };
-        final xy = polar(theta, r, cx: .5 + (px - .5) * .1, cy: .5 + (py - .5) * .1);
-        if (j == 0) { pathShape.moveTo(xy.dx, xy.dy); } else { pathShape.lineTo(xy.dx, xy.dy); }
+        final xy = polar(
+          theta,
+          r,
+          cx: .5 + (px - .5) * .1,
+          cy: .5 + (py - .5) * .1,
+        );
+        if (j == 0) {
+          pathShape.moveTo(xy.dx, xy.dy);
+        } else {
+          pathShape.lineTo(xy.dx, xy.dy);
+        }
       }
-      path(pathShape, k, width: 1.4 + k % 3, opacity: .2 + .55 * (1 - k / count), glow: k % 5 == 0);
+      path(
+        pathShape,
+        k,
+        width: 1.4 + k % 3,
+        opacity: .2 + .55 * (1 - k / count),
+        glow: k % 5 == 0,
+      );
     }
   }
 
@@ -134,12 +178,26 @@ class _InstrumentBrush {
           6 => math.sin(angle * 6 + k * .22) * math.cos(t + angle),
           7 => math.sin(angle * 3 + t + math.sin(angle * 5)),
           8 => math.cos(angle * 11 - t) * math.exp(-math.pow((u - .5) * 3, 2)),
-          _ => .6 * math.sin(angle * 9 + t) + .4 * math.cos(angle * 13 - t * .7),
+          _ =>
+            .6 * math.sin(angle * 9 + t) + .4 * math.cos(angle * 13 - t * .7),
         };
-        final xy = point(u, y0 + bend * (.035 + .09 * density) + (py - .5) * .06);
-        if (j == 0) { p.moveTo(xy.dx, xy.dy); } else { p.lineTo(xy.dx, xy.dy); }
+        final xy = point(
+          u,
+          y0 + bend * (.035 + .09 * density) + (py - .5) * .06,
+        );
+        if (j == 0) {
+          p.moveTo(xy.dx, xy.dy);
+        } else {
+          p.lineTo(xy.dx, xy.dy);
+        }
       }
-      path(p, k, width: k % 7 == 0 ? 3 : 1.2, opacity: .18 + .56 * (1 - (k / count) * .6), glow: k % 8 == 0);
+      path(
+        p,
+        k,
+        width: k % 7 == 0 ? 3 : 1.2,
+        opacity: .18 + .56 * (1 - (k / count) * .6),
+        glow: k % 8 == 0,
+      );
     }
   }
 
@@ -151,7 +209,18 @@ class _InstrumentBrush {
       final angle = t * .13 + k * .22;
       final sides = 3 + ((k + variant * 3) % 11);
       final radius = .07 + .32 * (k + .5) / count;
-      final corners = switch (variant) { 0 => sides, 1 => 12, 2 => 5, 3 => 6, 4 => 8, 5 => 9, 6 => 4, 7 => 13, 8 => 7, _ => 16 };
+      final corners = switch (variant) {
+        0 => sides,
+        1 => 12,
+        2 => 5,
+        3 => 6,
+        4 => 8,
+        5 => 9,
+        6 => 4,
+        7 => 13,
+        8 => 7,
+        _ => 16,
+      };
       for (var j = 0; j <= corners; j++) {
         final a = angle + j / corners * math.pi * 2;
         final r = switch (variant) {
@@ -166,10 +235,25 @@ class _InstrumentBrush {
           8 => radius * (j % 3 == 1 ? .4 : 1.03),
           _ => radius * (.65 + .4 * math.sin(j + k)),
         };
-        final xy = polar(a, r, cx: .5 + (px - .5) * .08, cy: .5 + (py - .5) * .08);
-        if (j == 0) { p.moveTo(xy.dx, xy.dy); } else { p.lineTo(xy.dx, xy.dy); }
+        final xy = polar(
+          a,
+          r,
+          cx: .5 + (px - .5) * .08,
+          cy: .5 + (py - .5) * .08,
+        );
+        if (j == 0) {
+          p.moveTo(xy.dx, xy.dy);
+        } else {
+          p.lineTo(xy.dx, xy.dy);
+        }
       }
-      path(p, k, width: 1 + k % 3, opacity: .22 + .5 * (1 - k / count), glow: k % 7 == 0);
+      path(
+        p,
+        k,
+        width: 1 + k % 3,
+        opacity: .22 + .5 * (1 - k / count),
+        glow: k % 7 == 0,
+      );
     }
   }
 
@@ -198,7 +282,13 @@ class _InstrumentBrush {
         if (x < -.1 || x > 1.1 || y < -.1 || y > 1.1) break;
         p.lineTo(x * size.width, y * size.height);
       }
-      path(p, k, width: .8 + rand(k) * 1.4, opacity: .3 + rand(k+10) * .55, glow: k % 13 == 0);
+      path(
+        p,
+        k,
+        width: .8 + rand(k) * 1.4,
+        opacity: .3 + rand(k + 10) * .55,
+        glow: k % 13 == 0,
+      );
     }
   }
 
@@ -206,25 +296,59 @@ class _InstrumentBrush {
   void gardens() {
     void branch(Offset from, double a, double len, int depth, int k, Path p) {
       if (depth == 0 || len < .002) return;
-      final next = from + Offset(math.cos(a) * len * size.width, math.sin(a) * len * size.height);
+      final next =
+          from +
+          Offset(
+            math.cos(a) * len * size.width,
+            math.sin(a) * len * size.height,
+          );
       p.moveTo(from.dx, from.dy);
       p.lineTo(next.dx, next.dy);
       final split = switch (variant) {
-        0 => .42, 1 => .25, 2 => .66, 3 => .34, 4 => .78,
-        5 => .29, 6 => .52, 7 => .18, 8 => .61, _ => .47,
+        0 => .42,
+        1 => .25,
+        2 => .66,
+        3 => .34,
+        4 => .78,
+        5 => .29,
+        6 => .52,
+        7 => .18,
+        8 => .61,
+        _ => .47,
       };
       final rotate = math.sin(t * .4 + depth * 2 + k) * .09;
-      branch(next, a - split + rotate, len * (.62 + .02 * variant), depth - 1, k, p);
+      branch(
+        next,
+        a - split + rotate,
+        len * (.62 + .02 * variant),
+        depth - 1,
+        k,
+        p,
+      );
       if (depth % (variant % 3 + 1) == 0 || variant.isEven) {
-        branch(next, a + split + rotate, len * (.59 + .014 * variant), depth - 1, k + 1, p);
+        branch(
+          next,
+          a + split + rotate,
+          len * (.59 + .014 * variant),
+          depth - 1,
+          k + 1,
+          p,
+        );
       }
     }
+
     for (var k = 0; k < 8 + (density * 6).round(); k++) {
       final p = Path();
       final root = point((k + .5) / (8 + (density * 6).round()), 1.02);
       final stem = -.5 * math.pi + (k - 5) * .06 + (px - .5) * .3;
       branch(root, stem, .16 + rand(k) * .09, 5 + variant % 2, k, p);
-      path(p, k, width: .8 + (variant % 3) * .4, opacity: .3 + .5 * rand(k + 53), glow: k % 6 == 0);
+      path(
+        p,
+        k,
+        width: .8 + (variant % 3) * .4,
+        opacity: .3 + .5 * rand(k + 53),
+        glow: k % 6 == 0,
+      );
     }
   }
 
@@ -259,11 +383,29 @@ class _InstrumentBrush {
         8 => .5 + math.cos(a * 5) * r * .42,
         _ => .5 + math.sin(a + t * .12) * r * .45,
       };
-      final b = switch (variant) { 0 => drift, 1 => drift * 3, 2 => -drift, 3 => drift, 4 => drift * .5, 5 => -drift * 2, 6 => drift, 7 => drift * 1.5, 8 => -drift, _ => drift * 3 };
+      final b = switch (variant) {
+        0 => drift,
+        1 => drift * 3,
+        2 => -drift,
+        3 => drift,
+        4 => drift * .5,
+        5 => -drift * 2,
+        6 => drift,
+        7 => drift * 1.5,
+        8 => -drift,
+        _ => drift * 3,
+      };
       final p = point(x + b + (px - .5) * .06, y - b + (py - .5) * .06);
-      dot(p, .6 + rand(k * 17) * (2.7 + variant % 4), k, .24 + .72 * rand(k * 13));
+      dot(
+        p,
+        .6 + rand(k * 17) * (2.7 + variant % 4),
+        k,
+        .24 + .72 * rand(k * 13),
+      );
       if (k % (12 + variant) == 0) {
-        final v = Path()..moveTo(p.dx - 5, p.dy)..lineTo(p.dx + 5, p.dy);
+        final v = Path()
+          ..moveTo(p.dx - 5, p.dy)
+          ..lineTo(p.dx + 5, p.dy);
         path(v, k, width: .8, opacity: .65);
       }
     }
@@ -290,9 +432,18 @@ class _InstrumentBrush {
           _ => .06 * math.sin(u * 32 + v * 15) * math.cos(v * 11 + t),
         };
         final xy = variant.isEven ? point(u, v + offset) : point(v + offset, u);
-        if (j == 0) { p.moveTo(xy.dx, xy.dy); } else { p.lineTo(xy.dx, xy.dy); }
+        if (j == 0) {
+          p.moveTo(xy.dx, xy.dy);
+        } else {
+          p.lineTo(xy.dx, xy.dy);
+        }
       }
-      path(p, k, width: k % 5 == 0 ? 1.8 : .9, opacity: .26 + .50 * (1 - k / count));
+      path(
+        p,
+        k,
+        width: k % 5 == 0 ? 1.8 : .9,
+        opacity: .26 + .50 * (1 - k / count),
+      );
     }
   }
 
@@ -316,10 +467,25 @@ class _InstrumentBrush {
           _ => math.sin(27 * a + t) + .3 * math.cos(7 * a),
         };
         final r = .08 + .26 * (k + 1) / count + harmonic * .028;
-        final xy = polar(a + k * .024, r, cx: .5 + (px - .5) * .05, cy: .5 + (py - .5) * .05);
-        if (j == 0) { p.moveTo(xy.dx, xy.dy); } else { p.lineTo(xy.dx, xy.dy); }
+        final xy = polar(
+          a + k * .024,
+          r,
+          cx: .5 + (px - .5) * .05,
+          cy: .5 + (py - .5) * .05,
+        );
+        if (j == 0) {
+          p.moveTo(xy.dx, xy.dy);
+        } else {
+          p.lineTo(xy.dx, xy.dy);
+        }
       }
-      path(p, k, width: 1.2, opacity: .3 + .5 * (1 - k / count), glow: k % 6 == 0);
+      path(
+        p,
+        k,
+        width: 1.2,
+        opacity: .3 + .5 * (1 - k / count),
+        glow: k % 6 == 0,
+      );
     }
   }
 
@@ -344,7 +510,11 @@ class _InstrumentBrush {
           _ => .08 * math.sin(a * 2 + t) * math.cos(a * 7 + v * 7),
         };
         final xy = point(x, v + h + (py - .5) * .035);
-        if (j == 0) { p.moveTo(xy.dx, xy.dy); } else { p.lineTo(xy.dx, xy.dy); }
+        if (j == 0) {
+          p.moveTo(xy.dx, xy.dy);
+        } else {
+          p.lineTo(xy.dx, xy.dy);
+        }
       }
       path(p, k, width: .9 + k % 3 * .4, opacity: .3 + .5 * (1 - k / count));
     }
@@ -362,12 +532,24 @@ class _InstrumentBrush {
         final radius = .10 + .30 * (k + 1) / layers;
         final x = polar(phase, radius * (spread.isEven ? .7 : 1.0));
         if (petal == 0) p.moveTo(x.dx, x.dy);
-        final left = polar(phase + math.pi / petals, radius * (.25 + .04 * (variant % 4)));
-        final right = polar(phase + 2 * math.pi / petals, radius * (spread == 2 ? 1.2 : 1));
+        final left = polar(
+          phase + math.pi / petals,
+          radius * (.25 + .04 * (variant % 4)),
+        );
+        final right = polar(
+          phase + 2 * math.pi / petals,
+          radius * (spread == 2 ? 1.2 : 1),
+        );
         p.quadraticBezierTo(left.dx, left.dy, right.dx, right.dy);
       }
       p.close();
-      path(p, k, width: 1 + k % 3, opacity: .24 + .56 * (1 - k / layers), glow: k % 4 == 0);
+      path(
+        p,
+        k,
+        width: 1 + k % 3,
+        opacity: .24 + .56 * (1 - k / layers),
+        glow: k % 4 == 0,
+      );
     }
     for (var p = 0; p < petals; p++) {
       final a = p * math.pi * 2 / petals + t * .1;

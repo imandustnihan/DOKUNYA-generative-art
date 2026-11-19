@@ -44,6 +44,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   bool dirty = false;
   WorkspacePage page = WorkspacePage.studio;
   List<ArtDocument> documents = [];
+
   /// Locally persisted instrument favorites; never sent to a server.
   final Set<int> favoriteInstruments = <int>{};
   String? projectId;
@@ -74,9 +75,13 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     final favorites = pref['favoriteInstruments'];
     favoriteInstruments
       ..clear()
-      ..addAll(favorites is List
-          ? favorites.whereType<int>().where((id) => id >= 0 && id < instrumentCount)
-          : const <int>[]);
+      ..addAll(
+        favorites is List
+            ? favorites.whereType<int>().where(
+                (id) => id >= 0 && id < instrumentCount,
+              )
+            : const <int>[],
+      );
     reducedMotion = pref['reducedMotion'] == true;
     tv = television || pref['tv'] == true;
     quality =

@@ -76,6 +76,7 @@ class ArtSettings {
     this.autoArt = true,
   });
   final ArtMode mode;
+
   /// -1 keeps the five original engines; 0..99 selects new procedural engines.
   final int instrument;
   final double speed, density, trail, rotation;

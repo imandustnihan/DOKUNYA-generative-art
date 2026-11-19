@@ -581,11 +581,9 @@ class _WorkspaceState extends State<Workspace> {
   Future<void> _selectInstrument(int id) async {
     if (!await _preserveWork()) return;
     final current = c.engine.settings;
-    c.change(current.copyWith(
-      mode: ArtMode.neonFlow,
-      instrument: id,
-      autoArt: true,
-    ));
+    c.change(
+      current.copyWith(mode: ArtMode.neonFlow, instrument: id, autoArt: true),
+    );
     c.restart();
     c.name = instrumentName(id);
     if (mounted) setState(() {});
@@ -609,14 +607,22 @@ class _WorkspaceState extends State<Workspace> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final width = constraints.maxWidth;
-              final columns = width >= 1150 ? 5 : width >= 760 ? 4 : width >= 460 ? 3 : 2;
+              final columns = width >= 1150
+                  ? 5
+                  : width >= 760
+                  ? 4
+                  : width >= 460
+                  ? 3
+                  : 2;
               final ids = List.generate(instrumentCount, (i) => i).where((id) {
                 final categoryMatches = family < 0 || id ~/ 10 == family;
-                final queryMatches = search.isEmpty ||
+                final queryMatches =
+                    search.isEmpty ||
                     instrumentName(id).toLowerCase().contains(search) ||
                     instrumentFamily(id).toLowerCase().contains(search);
                 return (!favoritesOnly || c.favoriteInstruments.contains(id)) &&
-                    categoryMatches && queryMatches;
+                    categoryMatches &&
+                    queryMatches;
               }).toList();
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -627,18 +633,29 @@ class _WorkspaceState extends State<Workspace> {
                       children: [
                         const Icon(Icons.auto_awesome, color: accent),
                         const SizedBox(width: 12),
-                        Expanded(child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(t('engineAtlas'), style: TextStyle(
-                              color: accent.withValues(alpha: .9),
-                              fontSize: 10, letterSpacing: 2.4, fontWeight: FontWeight.w800,
-                            )),
-                            Text(t('engineWorlds'), style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.w700,
-                            )),
-                          ],
-                        )),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t('engineAtlas'),
+                                style: TextStyle(
+                                  color: accent.withValues(alpha: .9),
+                                  fontSize: 10,
+                                  letterSpacing: 2.4,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                t('engineWorlds'),
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         IconButton(
                           onPressed: () => Navigator.pop(sheetContext),
                           tooltip: t('engineClose'),
@@ -648,16 +665,22 @@ class _WorkspaceState extends State<Workspace> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
                     child: TextField(
                       key: const ValueKey('engine_search'),
-                      onChanged: (value) => update(() => search = value.trim().toLowerCase()),
+                      onChanged: (value) =>
+                          update(() => search = value.trim().toLowerCase()),
                       decoration: InputDecoration(
                         hintText: t('engineSearch'),
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
                         fillColor: const Color(0xff1d1e2a),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
@@ -665,19 +688,27 @@ class _WorkspaceState extends State<Workspace> {
                     height: 56,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
                       children: [
                         ChoiceChip(
                           key: const ValueKey('engine_favorites_chip'),
                           avatar: const Icon(Icons.favorite, size: 16),
-                          label: Text("${t('engineFavorites')} (${c.favoriteInstruments.length})"),
+                          label: Text(
+                            "${t('engineFavorites')} (${c.favoriteInstruments.length})",
+                          ),
                           selected: favoritesOnly,
-                          onSelected: (selected) => update(() => favoritesOnly = selected),
+                          onSelected: (selected) =>
+                              update(() => favoritesOnly = selected),
                         ),
                         const SizedBox(width: 8),
                         for (var i = -1; i < engineFamilies.length; i++) ...[
                           ChoiceChip(
-                            label: Text(i == -1 ? t('engineAll') : engineFamilies[i]),
+                            label: Text(
+                              i == -1 ? t('engineAll') : engineFamilies[i],
+                            ),
                             selected: family == i,
                             onSelected: (_) => update(() => family = i),
                           ),
@@ -692,16 +723,18 @@ class _WorkspaceState extends State<Workspace> {
                         : GridView.builder(
                             key: const ValueKey('engine_grid'),
                             padding: const EdgeInsets.all(18),
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: columns,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: width < 460 ? .81 : .85,
-                            ),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: columns,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: width < 460 ? .81 : .85,
+                                ),
                             itemCount: ids.length,
                             itemBuilder: (context, index) {
                               final id = ids[index];
-                              final selected = c.engine.settings.instrument == id;
+                              final selected =
+                                  c.engine.settings.instrument == id;
                               return InkWell(
                                 key: ValueKey('instrument_$id'),
                                 onTap: () async {
@@ -713,18 +746,29 @@ class _WorkspaceState extends State<Workspace> {
                                   decoration: BoxDecoration(
                                     color: const Color(0xff1b1b28),
                                     borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(color: selected ? accent : const Color(0xff353044)),
+                                    border: Border.all(
+                                      color: selected
+                                          ? accent
+                                          : const Color(0xff353044),
+                                    ),
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
                                         child: Stack(
                                           fit: StackFit.expand,
                                           children: [
                                             ClipRRect(
-                                              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                                              child: _InstrumentThumbnail(key: ValueKey('preview_$id'), id: id),
+                                              borderRadius:
+                                                  const BorderRadius.vertical(
+                                                    top: Radius.circular(14),
+                                                  ),
+                                              child: _InstrumentThumbnail(
+                                                key: ValueKey('preview_$id'),
+                                                id: id,
+                                              ),
                                             ),
                                             Positioned(
                                               top: 5,
@@ -734,18 +778,30 @@ class _WorkspaceState extends State<Workspace> {
                                                 shape: const CircleBorder(),
                                                 child: IconButton(
                                                   key: ValueKey('favorite_$id'),
-                                                  tooltip: t('engineFavoriteToggle'),
-                                                  visualDensity: VisualDensity.compact,
+                                                  tooltip: t(
+                                                    'engineFavoriteToggle',
+                                                  ),
+                                                  visualDensity:
+                                                      VisualDensity.compact,
                                                   iconSize: 19,
                                                   icon: Icon(
-                                                    c.favoriteInstruments.contains(id)
-                                                        ? Icons.favorite : Icons.favorite_border,
-                                                    color: c.favoriteInstruments.contains(id)
-                                                        ? accent : Colors.white,
+                                                    c.favoriteInstruments
+                                                            .contains(id)
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color:
+                                                        c.favoriteInstruments
+                                                            .contains(id)
+                                                        ? accent
+                                                        : Colors.white,
                                                   ),
                                                   onPressed: () => _guard(() async {
-                                                    await c.toggleFavoriteInstrument(id);
-                                                    if (sheetContext.mounted) update(() {});
+                                                    await c
+                                                        .toggleFavoriteInstrument(
+                                                          id,
+                                                        );
+                                                    if (sheetContext.mounted)
+                                                      update(() {});
                                                   }),
                                                 ),
                                               ),
@@ -754,17 +810,34 @@ class _WorkspaceState extends State<Workspace> {
                                         ),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(11, 9, 8, 11),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          11,
+                                          9,
+                                          8,
+                                          11,
+                                        ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text(instrumentName(id), maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                                            Text('${(id + 1).toString().padLeft(3, '0')} · ${instrumentFamily(id)}',
+                                            Text(
+                                              instrumentName(id),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(color: muted, fontSize: 9)),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            Text(
+                                              '${(id + 1).toString().padLeft(3, '0')} · ${instrumentFamily(id)}',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                color: muted,
+                                                fontSize: 9,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -806,7 +879,10 @@ class _WorkspaceState extends State<Workspace> {
                           key: const ValueKey('mode_picker'),
                           tooltip: t('modes'),
                           onSelected: (mode) => c.change(
-                            c.engine.settings.copyWith(mode: mode, instrument: -1),
+                            c.engine.settings.copyWith(
+                              mode: mode,
+                              instrument: -1,
+                            ),
                           ),
                           itemBuilder: (context) => [
                             for (final mode in ArtMode.values)
@@ -831,8 +907,14 @@ class _WorkspaceState extends State<Workspace> {
                                 Flexible(
                                   child: Text(
                                     c.engine.settings.instrument >= 0
-                                        ? instrumentName(c.engine.settings.instrument)
-                                        : modeNames[c.engine.settings.mode.index],
+                                        ? instrumentName(
+                                            c.engine.settings.instrument,
+                                          )
+                                        : modeNames[c
+                                              .engine
+                                              .settings
+                                              .mode
+                                              .index],
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
@@ -857,7 +939,10 @@ class _WorkspaceState extends State<Workspace> {
                         child: FilledButton.tonalIcon(
                           key: const ValueKey('engine_library_open'),
                           onPressed: _openEngineLibrary,
-                          icon: const Icon(Icons.auto_awesome_mosaic_outlined, size: 18),
+                          icon: const Icon(
+                            Icons.auto_awesome_mosaic_outlined,
+                            size: 18,
+                          ),
                           label: Text(t('engineLibrary')),
                         ),
                       ),
@@ -1007,7 +1092,8 @@ class _WorkspaceState extends State<Workspace> {
           separatorBuilder: (_, i) => const SizedBox(height: 10),
           itemBuilder: (context, i) {
             final mode = ArtMode.values[i],
-                selected = c.engine.settings.mode == mode &&
+                selected =
+                    c.engine.settings.mode == mode &&
                     c.engine.settings.instrument < 0;
             return Semantics(
               selected: selected,
@@ -1382,7 +1468,11 @@ class _WorkspaceState extends State<Workspace> {
               gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xff29203b), Color(0xff131a2b), Color(0xff12121c)],
+                colors: [
+                  Color(0xff29203b),
+                  Color(0xff131a2b),
+                  Color(0xff12121c),
+                ],
               ),
               border: Border.all(color: const Color(0xff62517b)),
             ),
@@ -1395,15 +1485,31 @@ class _WorkspaceState extends State<Workspace> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(t('engineAtlas'), style: const TextStyle(
-                      color: accent, fontSize: 11, letterSpacing: 2,
-                      fontWeight: FontWeight.w700)),
+                    Text(
+                      t('engineAtlas'),
+                      style: const TextStyle(
+                        color: accent,
+                        fontSize: 11,
+                        letterSpacing: 2,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     SizedBox(height: 12),
-                    Text(t('engineWorlds'), style: const TextStyle(
-                      fontSize: 26, fontWeight: FontWeight.w800)),
+                    Text(
+                      t('engineWorlds'),
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
                     SizedBox(height: 6),
-                    Text(t('engineSummary'),
-                      style: const TextStyle(color: Color(0xffb2a9c7), fontSize: 12)),
+                    Text(
+                      t('engineSummary'),
+                      style: const TextStyle(
+                        color: Color(0xffb2a9c7),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
                 FilledButton.icon(
@@ -1416,11 +1522,23 @@ class _WorkspaceState extends State<Workspace> {
             ),
           ),
           const SizedBox(height: 33),
-          Row(children: [
-            Expanded(child: Text(t('engineFeatured'), style:
-              const TextStyle(fontSize: 19, fontWeight: FontWeight.w700))),
-            TextButton(onPressed: _openEngineLibrary, child: Text(t('engineAll') + ' →')),
-          ]),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  t('engineFeatured'),
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: _openEngineLibrary,
+                child: Text(t('engineAll') + ' →'),
+              ),
+            ],
+          ),
           const SizedBox(height: 14),
           GridView.builder(
             shrinkWrap: true,
@@ -1444,21 +1562,44 @@ class _WorkspaceState extends State<Workspace> {
                     borderRadius: BorderRadius.circular(15),
                     border: Border.all(color: line),
                   ),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Expanded(child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-                      child: _InstrumentThumbnail(key: ValueKey('featured_$id'), id: id),
-                    )),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(13, 10, 12, 12),
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Text(instrumentName(id), style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w700)),
-                        Text(instrumentFamily(id), style: const TextStyle(
-                          color: muted, fontSize: 10)),
-                      ]),
-                    ),
-                  ]),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(14),
+                          ),
+                          child: _InstrumentThumbnail(
+                            key: ValueKey('featured_$id'),
+                            id: id,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(13, 10, 12, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              instrumentName(id),
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              instrumentFamily(id),
+                              style: const TextStyle(
+                                color: muted,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -1940,21 +2081,20 @@ class _InstrumentThumbnail extends StatefulWidget {
 }
 
 class _InstrumentThumbnailState extends State<_InstrumentThumbnail> {
-  late final ArtEngine engine = ArtEngine(
-    seed: 2749 + widget.id * 313,
-    settings: ArtSettings(
-      mode: ArtMode.neonFlow,
-      instrument: widget.id,
-      palette: (widget.id ~/ 10) % palettes.length,
-    ),
-  )..budget = QualityBudget.profiles[0]
-   ..time = 4.7;
+  late final ArtEngine engine =
+      ArtEngine(
+          seed: 2749 + widget.id * 313,
+          settings: ArtSettings(
+            mode: ArtMode.neonFlow,
+            instrument: widget.id,
+            palette: (widget.id ~/ 10) % palettes.length,
+          ),
+        )
+        ..budget = QualityBudget.profiles[0]
+        ..time = 4.7;
 
   @override
   Widget build(BuildContext context) => RepaintBoundary(
-    child: CustomPaint(
-      painter: ArtPainter(engine),
-      size: Size.infinite,
-    ),
+    child: CustomPaint(painter: ArtPainter(engine), size: Size.infinite),
   );
 }

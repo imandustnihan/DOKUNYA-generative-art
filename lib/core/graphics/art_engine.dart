@@ -142,7 +142,8 @@ class ArtEngine {
     if (!seconds.isFinite || seconds <= 0) return;
     final dt = seconds.clamp(0, 1 / 15) * (.15 + settings.speed * 1.6);
     time += dt;
-    if (settings.instrument >= 0 || settings.mode != ArtMode.particleGalaxy) return;
+    if (settings.instrument >= 0 || settings.mode != ArtMode.particleGalaxy)
+      return;
     final target = (budget.particles * settings.density).round();
     if (particleCount > target) particleCount = target;
     if (settings.autoArt) {
