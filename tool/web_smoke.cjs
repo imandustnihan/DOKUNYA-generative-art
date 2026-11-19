@@ -3,13 +3,17 @@
 const {chromium}=require('playwright');
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(process.argv[2]||'build/web');
+const basePath='/' + (process.env.DOKUNYA_WEB_BASE || '/').replace(/^\/+|\/+$/g,'') + '/';
 const evidence=path.resolve(process.env.ARTPULSE_EVIDENCE||'build/browser-evidence');
 fs.mkdirSync(evidence,{recursive:true});
 const types={'.html':'text/html','.js':'text/javascript','.json':'application/json','.wasm':'application/wasm','.png':'image/png','.ttf':'font/ttf','.otf':'font/otf'};
 const results=[];
 (async()=>{
  const server=http.createServer((req,res)=>{
-  let name=decodeURIComponent(new URL(req.url,'http://local').pathname);if(name.endsWith('/'))name+='index.html';
+  let name=decodeURIComponent(new URL(req.url,'http://local').pathname);
+  if(!name.startsWith(basePath)){res.writeHead(404);res.end();return;}
+  name='/'+name.slice(basePath.length);
+  if(name.endsWith('/'))name+='index.html';
   const file=path.resolve(root,'.'+name);
   if(!file.startsWith(root+path.sep)){res.writeHead(403);res.end();return;}
   try{const bytes=fs.readFileSync(file);res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});res.end(bytes);}
@@ -46,7 +50,7 @@ const results=[];
    for(let i=0;i<50;i++){const docs=(await database()).filter(d=>d.name==='Browser verified');if(docs.length)return docs[0];await page.waitForTimeout(50);}
    throw Error('Project was not persisted');
   }
-  await page.goto(origin,{waitUntil:'domcontentloaded'});await semantics();
+  await page.goto(origin+basePath,{waitUntil:'domcontentloaded'});await semantics();
   await page.getByRole('button',{name:'Pause',exact:true}).click({force:true});
   await page.getByRole('button',{name:'Resume',exact:true}).waitFor();
   const canvas=page.getByRole('img',{name:'Interactive artwork. Drag to draw; use two fingers to zoom.',exact:true});
