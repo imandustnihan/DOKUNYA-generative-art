@@ -33,6 +33,12 @@ class _ArtCanvasState extends State<ArtCanvas> {
   }
 
   @override
+  void dispose() {
+    c.engine.endAll();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
       final size = constraints.biggest;

@@ -264,4 +264,24 @@ void main() {
     expect(identical(before, after), isTrue);
     expect(c.engine.time, greaterThan(0));
   });
+  testWidgets(
+    'rotation preserves the drawing and releases transient pointers',
+    (tester) async {
+      final c = await boot(tester, size: const Size(430, 932));
+      final canvas = find.byKey(const ValueKey('art_canvas'));
+      final gesture = await tester.startGesture(tester.getCenter(canvas));
+      await gesture.moveBy(const Offset(40, 30));
+      final samples = c.engine.sampleCount;
+      expect(c.engine.pointers, isNotEmpty);
+      tester.view.physicalSize = const Size(740, 360);
+      await tester.pump();
+      await tester.pump();
+      expect(c.engine.sampleCount, samples);
+      expect(c.engine.pointers, isEmpty);
+      expect(tester.getSize(canvas).height, greaterThan(180));
+      expect(find.byKey(const ValueKey('action_save')), findsOneWidget);
+      await gesture.up();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

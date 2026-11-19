@@ -61,6 +61,7 @@ class Workspace extends StatefulWidget {
 class _WorkspaceState extends State<Workspace> {
   StudioController get c => widget.controller;
   bool _controlsVisible = true;
+  bool _shortLayout = false;
   Timer? _hideTimer;
   (double, double) _remotePoint = (.5, .5);
   String t(String key) => c.t(key);
@@ -352,6 +353,18 @@ class _WorkspaceState extends State<Workspace> {
                 : LayoutBuilder(
                     builder: (context, bounds) {
                       final compact = bounds.maxWidth < 760;
+                      _shortLayout =
+                          bounds.maxHeight < 460 &&
+                          bounds.maxWidth >= 500 &&
+                          bounds.maxWidth < 930;
+                      if (_shortLayout) {
+                        return Row(
+                          children: [
+                            _navigation(short: true),
+                            Expanded(child: _pageContent()),
+                          ],
+                        );
+                      }
                       return Column(
                         children: [
                           _header(bounds.maxWidth),
@@ -359,14 +372,7 @@ class _WorkspaceState extends State<Workspace> {
                             child: Row(
                               children: [
                                 if (!compact) _navigation(),
-                                Expanded(
-                                  child: switch (c.page) {
-                                    WorkspacePage.studio => _studio(),
-                                    WorkspacePage.home => _home(),
-                                    WorkspacePage.gallery => _gallery(),
-                                    WorkspacePage.settings => _settings(),
-                                  },
-                                ),
+                                Expanded(child: _pageContent()),
                               ],
                             ),
                           ),
@@ -381,6 +387,12 @@ class _WorkspaceState extends State<Workspace> {
     );
   }
 
+  Widget _pageContent() => switch (c.page) {
+    WorkspacePage.studio => _studio(),
+    WorkspacePage.home => _home(),
+    WorkspacePage.gallery => _gallery(),
+    WorkspacePage.settings => _settings(),
+  };
   Widget _header(double width) => Container(
     padding: EdgeInsets.symmetric(
       horizontal: width < 500 ? 12 : 24,
@@ -450,31 +462,28 @@ class _WorkspaceState extends State<Workspace> {
               key: const ValueKey('action_save'),
             ),
         ],
-        PopupMenuButton<String>(
-          key: const ValueKey('file_menu'),
-          tooltip: t('tools'),
-          icon: const Icon(Icons.more_horiz, color: muted),
-          onSelected: (value) {
-            if (value == 'import') _import();
-            if (value == 'png') _export();
-            if (value == 'json') _export(project: true);
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(value: 'import', child: Text(t('import'))),
-            PopupMenuItem(
-              value: 'png',
-              enabled: !c.busy,
-              child: Text(t('export')),
-            ),
-            PopupMenuItem(
-              value: 'json',
-              enabled: !c.busy,
-              child: Text(t('exportProject')),
-            ),
-          ],
-        ),
+        _fileMenu(),
       ],
     ),
+  );
+  Widget _fileMenu() => PopupMenuButton<String>(
+    key: const ValueKey('file_menu'),
+    tooltip: t('tools'),
+    icon: const Icon(Icons.more_horiz, color: muted),
+    onSelected: (value) {
+      if (value == 'import') _import();
+      if (value == 'png') _export();
+      if (value == 'json') _export(project: true);
+    },
+    itemBuilder: (context) => [
+      PopupMenuItem(value: 'import', child: Text(t('import'))),
+      PopupMenuItem(value: 'png', enabled: !c.busy, child: Text(t('export'))),
+      PopupMenuItem(
+        value: 'json',
+        enabled: !c.busy,
+        child: Text(t('exportProject')),
+      ),
+    ],
   );
   static const _navIcons = [
     Icons.explore_outlined,
@@ -482,17 +491,25 @@ class _WorkspaceState extends State<Workspace> {
     Icons.grid_view_rounded,
     Icons.tune,
   ];
-  Widget _navigation() => Container(
-    width: c.tv ? 96 : 78,
+  Widget _navigation({bool short = false}) => Container(
+    width: short ? 64 : (c.tv ? 96 : 78),
     decoration: const BoxDecoration(
       border: Border(right: BorderSide(color: line)),
     ),
     child: Column(
       children: [
-        const SizedBox(height: 20),
+        SizedBox(height: short ? 4 : 20),
+        if (short)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: ArtMark(size: 24),
+          ),
         for (final p in WorkspacePage.values)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+            padding: EdgeInsets.symmetric(
+              vertical: short ? 2 : 6,
+              horizontal: 8,
+            ),
             child: Tooltip(
               message: t(p.name),
               child: Semantics(
@@ -505,7 +522,7 @@ class _WorkspaceState extends State<Workspace> {
                   onTap: () => c.navigate(p),
                   child: Container(
                     width: 60,
-                    height: c.tv ? 76 : 62,
+                    height: short ? 48 : (c.tv ? 76 : 62),
                     decoration: BoxDecoration(
                       color: c.page == p
                           ? accent.withValues(alpha: .12)
@@ -538,10 +555,11 @@ class _WorkspaceState extends State<Workspace> {
             ),
           ),
         const Spacer(),
-        const Padding(
-          padding: EdgeInsets.all(22),
-          child: Icon(Icons.wifi_off_outlined, size: 19, color: muted),
-        ),
+        if (!short)
+          const Padding(
+            padding: EdgeInsets.all(22),
+            child: Icon(Icons.wifi_off_outlined, size: 19, color: muted),
+          ),
       ],
     ),
   );
@@ -823,6 +841,15 @@ class _WorkspaceState extends State<Workspace> {
     scrollDirection: Axis.horizontal,
     child: Row(
       children: [
+        if (_shortLayout) ...[
+          _icon(
+            Icons.bookmark_add_outlined,
+            'save',
+            _save,
+            key: const ValueKey('action_save'),
+          ),
+          _fileMenu(),
+        ],
         _icon(
           c.paused ? Icons.play_arrow_rounded : Icons.pause_rounded,
           c.paused ? 'resume' : 'pause',
