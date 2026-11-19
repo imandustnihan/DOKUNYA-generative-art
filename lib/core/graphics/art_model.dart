@@ -65,6 +65,7 @@ int checkedInt(Object? value, int min, int max) {
 class ArtSettings {
   const ArtSettings({
     this.mode = ArtMode.neonFlow,
+    this.instrument = -1,
     this.speed = .65,
     this.density = .55,
     this.trail = .75,
@@ -75,11 +76,15 @@ class ArtSettings {
     this.autoArt = true,
   });
   final ArtMode mode;
+
+  /// -1 keeps the five original engines; 0..99 selects new procedural engines.
+  final int instrument;
   final double speed, density, trail, rotation;
   final int symmetry, palette, background;
   final bool autoArt;
   ArtSettings copyWith({
     ArtMode? mode,
+    int? instrument,
     double? speed,
     double? density,
     double? trail,
@@ -90,6 +95,7 @@ class ArtSettings {
     bool? autoArt,
   }) => ArtSettings(
     mode: mode ?? this.mode,
+    instrument: instrument ?? this.instrument,
     speed: speed ?? this.speed,
     density: density ?? this.density,
     trail: trail ?? this.trail,
@@ -101,6 +107,7 @@ class ArtSettings {
   );
   Map<String, Object> toJson() => {
     'mode': modeIds[mode.index],
+    'instrument': instrument,
     'speed': speed,
     'density': density,
     'trail': trail,
@@ -118,12 +125,17 @@ class ArtSettings {
         j['autoArt'] is! bool) {
       throw const FormatException('settings');
     }
+    // Backward compatible with JSON documents saved before the new catalog.
+    final instrument = j.containsKey('instrument')
+        ? checkedInt(j['instrument'], -1, 99)
+        : -1;
     final p = checkedInt(j['palette'], 0, palettes.length - 1);
     if (jsonEncode(j['colors']) != jsonEncode(palettes[p])) {
       throw const FormatException('palette');
     }
     return ArtSettings(
       mode: ArtMode.values[i],
+      instrument: instrument,
       speed: finiteNumber(j['speed'], 0, 1),
       density: finiteNumber(j['density'], .05, 1),
       trail: finiteNumber(j['trail'], .1, 1),

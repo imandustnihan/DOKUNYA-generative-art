@@ -2,7 +2,13 @@
 
 An offline generative art instrument built with Flutter and Dart. Draw with touch, a stylus or a mouse; shape a live composition, save an editable project and export the art as PNG. Free and open source under MIT.
 
-![Legacy ARTPULSE v0.1.0 studio screenshot — DOKUNYA rebrand pending fresh render](docs/screenshots/studio-desktop.png)
+![Current DOKUNYA studio — reviewed Flutter golden render](test/goldens/desktop.png)
+
+## 100 procedural instruments
+
+The studio now includes a searchable, live-preview catalog with **100 named mathematical drawing variations** organized into ten families. You can select a variation, add it to local favorites, filter favorites, draw interactively and export artwork as PNG or versioned JSON. Classic Neon Flow, Particle Galaxy, Symmetry Lab, Liquid Light and Geometry Pulse remain selectable; older documents remain compatible. Turkish, Azerbaijani and English labels are supported. This is a public MIT-licensed source feature, not 100 separate GPU shader programs.
+
+Automated Flutter quality and build results are recorded in [GitHub Actions](../../actions). Browser rendering and physical-device testing remain separate requirements. See [100-instrument QA notes](docs/100_INSTRUMENTS_PUBLIC_QA.md).
 
 ## What works in 0.1.0
 
