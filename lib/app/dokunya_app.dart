@@ -935,18 +935,27 @@ class _WorkspaceState extends State<Workspace> {
                           ),
                         ),
                       ),
-                      Tooltip(
-                        message: t('engineExplore'),
-                        child: FilledButton.tonalIcon(
+                      if (bounds.maxWidth < 520 ||
+                          MediaQuery.textScalerOf(context).scale(1) > 1.3)
+                        IconButton(
                           key: const ValueKey('engine_library_open'),
+                          tooltip: t('engineExplore'),
                           onPressed: _openEngineLibrary,
-                          icon: const Icon(
-                            Icons.auto_awesome_mosaic_outlined,
-                            size: 18,
+                          icon: const Icon(Icons.auto_awesome_mosaic_outlined),
+                        )
+                      else
+                        Tooltip(
+                          message: t('engineExplore'),
+                          child: FilledButton.tonalIcon(
+                            key: const ValueKey('engine_library_open'),
+                            onPressed: _openEngineLibrary,
+                            icon: const Icon(
+                              Icons.auto_awesome_mosaic_outlined,
+                              size: 18,
+                            ),
+                            label: Text(t('engineLibrary')),
                           ),
-                          label: Text(t('engineLibrary')),
                         ),
-                      ),
                       const SizedBox(width: 8),
                       _icon(
                         Icons.center_focus_strong,

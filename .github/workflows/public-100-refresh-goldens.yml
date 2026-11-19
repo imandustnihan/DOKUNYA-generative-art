@@ -1,0 +1,40 @@
+name: Refresh reviewed PR 100-instrument golden baselines
+on:
+  push:
+    branches: [feature/public-100-instruments]
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install pinned Flutter 3.50.0
+        shell: bash
+        run: |
+          git clone --depth 1 --branch 3.50.0 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Regenerate reviewed layout goldens
+        shell: bash
+        run: |
+          flutter pub get
+          dart format lib/app/dokunya_app.dart
+          flutter test --update-goldens test/widget_test.dart
+      - name: Commit approved snapshots on feature branch only
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/app/dokunya_app.dart test/goldens
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "test(ui): refresh reviewed 100-instrument layouts"
+          git push origin HEAD:feature/public-100-instruments
+      - uses: actions/upload-artifact@v7
+        with:
+          name: reviewed-100-instrument-goldens
+          path: test/goldens/*.png
+          retention-days: 7
