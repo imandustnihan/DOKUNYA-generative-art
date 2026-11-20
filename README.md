@@ -10,7 +10,13 @@ The studio now includes a searchable, live-preview catalog with **100 named math
 
 Automated Flutter quality and build results are recorded in [GitHub Actions](../../actions). Browser rendering and physical-device testing remain separate requirements. See [100-instrument QA notes](docs/100_INSTRUMENTS_PUBLIC_QA.md).
 
-## What works in 0.1.0
+## DOKUNYA 0.1.3+4
+
+The studio keeps a two-second local draft and flushes pending work when the application goes into the background. A named save and a new instrument have independent project identities. Damaged drafts remain on disk when you resume drawing. The collection can be searched by artwork title or instrument, and PNG export includes the current zoom and pan.
+
+The free [website](https://imandustnihan.github.io/DOKUNYA-generative-art/) includes a searchable directory of the 100 variations. Each link opens the real [Flutter Studio](https://imandustnihan.github.io/DOKUNYA-generative-art/studio/). Recovered work takes priority over a requested instrument. These changes are tracked in [PR #8 and its checks](https://github.com/imandustnihan/DOKUNYA-generative-art/pull/8).
+
+## Studio controls and features
 
 - **Neon Flow:** evolving light ribbons plus pressure/speed-sensitive strokes.
 - **Particle Galaxy:** bounded particles, softened attraction and gesture bursts.
@@ -105,7 +111,7 @@ Golden baselines cover seven layouts. They are automated Flutter engine renders,
 
 The bounded simulation is Dart code under `lib/core/graphics`; platform storage and export are adapters. See [architecture](docs/ARCHITECTURE.md), [research](docs/RESEARCH.md), [performance](docs/PERFORMANCE.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
 
-The included GitHub workflows analyze, test and build on matching operating systems. Tagged releases publish only after the build matrix passes. The Pages workflow is manually invoked after enabling GitHub Pages with Actions as its source; it builds with the repository subpath. These workflows are configuration until an actual GitHub run proves their results.
+The included GitHub workflows analyze, test and build on matching operating systems. Tagged releases publish only after the build matrix passes. The Pages workflow builds the repository subpath on updates to main or manual dispatch. It runs Chromium against the assembled Astro and Flutter directories before publishing. See the platform matrix for build and device coverage.
 
 Tizen, webOS and tvOS have researched port plans, not delivered packages. GIF/video export, layers, a timeline, OS live wallpapers, thermal sensors and dynamic raster-resolution scaling are outside this first release.
 

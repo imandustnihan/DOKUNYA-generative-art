@@ -1,5 +1,5 @@
-import { mkdirSync, writeFileSync, readdirSync, statSync, existsSync } from 'node:fs';
-import { resolve, join, relative } from 'node:path';
+import { writeFileSync, existsSync } from 'node:fs';
+import { resolve, join } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..', 'dist');
 const base = '/' + (process.env.DOKUNYA_BASE || '/DOKUNYA-generative-art/').replace(/^\/+|\/+$/g, '') + '/';

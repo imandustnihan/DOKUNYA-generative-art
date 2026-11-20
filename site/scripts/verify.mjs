@@ -14,6 +14,10 @@ for (const language of ['tr', 'az', 'en']) {
     if (!html.includes('rel="canonical"')) throw new Error('Missing canonical URL in ' + path);
     if (!html.includes(base + 'studio/')) throw new Error('Wrong studio URL in ' + path);
     if (page === 'home' && !html.includes('studio-preview.png')) throw new Error('Missing authentic engine screenshot');
+    if (!html.toLowerCase().includes('content-security-policy')) throw new Error('Missing Astro content policy: ' + path);
+    if (page === 'discover' && (html.match(/data-instrument=/g) || []).length !== 100) {
+      throw new Error('Missing catalog instruments: ' + path);
+    }
     count++;
   }
 }

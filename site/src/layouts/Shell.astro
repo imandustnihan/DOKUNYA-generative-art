@@ -15,7 +15,7 @@ const origin = 'https://imandustnihan.github.io';
 const canonical = new URL(route(language, page, base), origin).href;
 const cardImage = new URL(base + 'media/studio-preview.png', origin).href;
 const navItems: PageName[] = ['home', 'discover', 'guide', 'about', 'privacy'];
-const studioHref = base + 'studio/';
+const studioHref = base + 'studio/?lang=' + language;
 ---
 <!doctype html>
 <html lang={language}>
@@ -41,7 +41,7 @@ const studioHref = base + 'studio/';
     <title>{title} · DOKUNYA</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">{tx.skip}</a>
     <div class="site-shell">
       <header class="header">
         <a class="brand" href={route(language, 'home', base)} aria-label="DOKUNYA">
@@ -54,7 +54,7 @@ const studioHref = base + 'studio/';
           ))}
         </nav>
         <div class="header-actions">
-          <div class="language-switch" aria-label="Language">
+          <div class="language-switch" aria-label={tx.language}>
             {languages.map((lang) => (
               <a href={route(lang, page, base)} lang={lang} hreflang={lang} aria-current={lang === language ? 'page' : undefined} data-language-choice={lang}>{lang.toUpperCase()}</a>
             ))}

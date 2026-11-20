@@ -2,13 +2,20 @@
 <html lang="en"><head>
 <base href="$FLUTTER_BASE_HREF">
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="DOKUNYA: five interactive generative art engines, private local projects, PNG export. Free and open source.">
+<meta name="description" content="DOKUNYA: 100 drawing instruments and five classic engines, private local projects, PNG export. Free and open source.">
 <meta name="theme-color" content="#0b0c12"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="DOKUNYA">
 <link rel="apple-touch-icon" href="icons/Icon-192.png"><link rel="icon" type="image/png" href="favicon.png">
 <link rel="manifest" href="manifest.json"><title>DOKUNYA — Generative Art Studio</title>
-<style>html,body{margin:0;width:100%;height:100%;background:#080911;color:#eeedf5}#loading{position:fixed;inset:0;display:grid;place-content:center;font:14px system-ui;letter-spacing:.2em;text-align:center}#loading small{margin-top:16px;color:#9494aa;letter-spacing:0}</style>
-</head><body><div id="loading">DOKUNYA<small>Opening your creative space…</small></div>
+<style>html,body{margin:0;width:100%;height:100%;background:#080911;color:#eeedf5}#loading{position:fixed;inset:0;display:grid;place-content:center;font:14px system-ui;letter-spacing:.2em;text-align:center}#loading img{display:block;margin:0 auto 18px;border-radius:16px}#loading small{margin-top:12px;color:#b3aabe;letter-spacing:0}#loading progress{width:88px;height:3px;margin:20px auto;accent-color:#bc9aff}@media(prefers-reduced-motion:reduce){#loading progress{display:none}}</style>
+</head><body><div id="loading" role="status"><img src="icons/Icon-192.png" alt="" width="64" height="64">DOKUNYA<small id="loading-message">Opening the studio…</small><progress aria-hidden="true"></progress></div>
+<script>
+  const messages = {en: 'Opening the studio…', tr: 'Stüdyo açılıyor…', az: 'Studiya açılır…'};
+  const requested = new URLSearchParams(location.search).get('lang');
+  const lang = [requested, navigator.language.split('-')[0], 'en'].find(key => Object.hasOwn(messages, key));
+  document.documentElement.lang = lang;
+  document.getElementById('loading-message').textContent = messages[lang];
+</script>
 <script src="flutter_bootstrap.js" async></script>
 <noscript>DOKUNYA needs JavaScript and a browser with WebGL support.</noscript>
 </body></html>

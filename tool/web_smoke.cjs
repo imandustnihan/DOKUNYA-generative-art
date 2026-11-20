@@ -51,6 +51,12 @@ const results=[];
    for(let i=0;i<50;i++){const docs=(await database()).filter(d=>d.name==='Browser verified');if(docs.length)return docs[0];await page.waitForTimeout(50);}
    throw Error('Project was not persisted');
   }
+  // Another Studio scope may already have an offline cache on the same origin.
+  await page.goto(origin + basePath + 'manifest.json');
+  await page.evaluate(async () => {
+    const other = await caches.open('artpulse-deadbeefdeadbeef');
+    await other.put('/other-studio/index.html', new Response('other studio'));
+  });
   await page.goto(origin+basePath,{waitUntil:'domcontentloaded'});await semantics();
   await page.getByRole('button',{name:'Pause',exact:true}).click({force:true});
   await page.getByRole('button',{name:'Resume',exact:true}).waitFor();
@@ -94,6 +100,19 @@ const results=[];
   const chooser=await chooserPromise;await chooser.setFiles({name:'broken.artpulse.json',mimeType:'application/json',buffer:Buffer.from('{"schemaVersion":999}')});
   await page.getByText('This project file is damaged, too large or uses an unsupported version.',{exact:true}).first().waitFor();
   results.push({test:'corrupt file import error',status:'passed'});
+  await page.getByRole('button',{name:'Tools',exact:true}).click({force:true});
+  const validChooser = page.waitForEvent('filechooser');
+  await page.getByRole('menuitem',{name:'Open project file',exact:true}).click({force:true});
+  await (await validChooser).setFiles(jsonPath);
+  await page.getByText('Project opened. Save it to keep a local copy.',{exact:true}).first().waitFor();
+  for (let attempt = 0; attempt < 80; attempt++) {
+    if ((await database()).some(doc => doc.id === 'autosave_draft' && doc.strokes.length)) break;
+    await page.waitForTimeout(100);
+  }
+  assert((await database()).some(doc => doc.id === 'autosave_draft' && doc.strokes.length));
+  await page.reload({waitUntil:'domcontentloaded'}); await semantics();
+  await page.getByText('Recovered unfinished canvas',{exact:true}).first().waitFor();
+  results.push({test:'JSON reimport and debounced IndexedDB draft recovery after reload', status:'passed'});
   await page.getByRole('button',{name:/^Settings/}).click({force:true});
   fs.writeFileSync(path.join(evidence,'language-aria.txt'),await page.locator('body').ariaSnapshot());
   await page.getByRole('checkbox',{name:'Türkçe',exact:true}).click({force:true});
@@ -107,8 +126,9 @@ const results=[];
    await navigator.serviceWorker.ready;
    if(!navigator.serviceWorker.controller)await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));
   });
-  const cache=await page.evaluate(async()=>({keys:await caches.keys(),count:(await(await caches.open((await caches.keys()).find(k=>k.startsWith('artpulse-')))).keys()).length}));
+  const cache=await page.evaluate(async()=>({keys:await caches.keys(),count:(await(await caches.open((await caches.keys()).find(k=>k.startsWith('artpulse-scope-')))).keys()).length}));
   assert(cache.count>40);
+  assert(cache.keys.includes('artpulse-deadbeefdeadbeef'), 'Another Studio scope lost its offline cache');
   await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await semantics();
   await page.getByRole('button',{name:'Layihəni saxla',exact:true}).waitFor();
   assert((await database()).some(d=>d.name==='Browser verified'));

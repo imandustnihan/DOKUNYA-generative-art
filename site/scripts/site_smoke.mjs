@@ -20,7 +20,7 @@ const server = createServer((request, response) => {
 });
 await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
 const origin = 'http://127.0.0.1:' + server.address().port;
-const browser = await chromium.launch({ headless:true, args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader'] });
+const browser = await chromium.launch({ headless:true, executablePath: process.env.CHROME_EXECUTABLE || undefined, args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader'] });
 const errors=[];
 const evidence = resolve(import.meta.dirname, '..', '..', 'build', 'browser-evidence');
 mkdirSync(evidence, { recursive: true });
@@ -34,17 +34,35 @@ try {
   await page.screenshot({path:join(evidence,'premium-home-desktop.png'),fullPage:true});
   const navigation = [
     ['discover/', '.discovery-item', 5],
-    ['guide/', '.info-panel', 6],
+    ['guide/', '.info-panel', 7],
     ['about/', '.editorial', 1],
     ['privacy/', '.info-panel', 5],
     ['az/', 'h1', 1],
     ['en/discover/', '.discovery-item', 5],
-    ['en/guide/', '.info-panel', 6],
+    ['en/guide/', '.info-panel', 7],
   ];
   for (const [path,selector,count] of navigation) {
     const response = await page.goto(origin + base + path, {waitUntil:'domcontentloaded'});
     assert.equal(response.status(),200,'Page does not support direct URL: '+path);
     assert.equal(await page.locator(selector).count(),count, 'Missing content '+path);
+  }
+  await page.goto(origin + base + 'az/discover/');
+  assert.equal(await page.locator('[data-instrument]').count(), 100);
+  const search = page.locator('[data-catalog-search]');
+  await search.fill('Endless Mosaic');
+  const instrument = page.getByRole('link', {name: /Endless Mosaic/});
+  await instrument.waitFor();
+  assert.equal(new URL(await instrument.getAttribute('href'), origin).searchParams.get('instrument'), '99');
+  assert.equal(new URL(await instrument.getAttribute('href'), origin).searchParams.get('lang'), 'az');
+  await search.fill('xyz-no-instrument');
+  assert.equal(await page.locator('[data-catalog-empty]').isVisible(), true);
+  await search.fill('');
+  assert.equal(await page.locator('.catalog-family[open]').count(), 0);
+  const policy = await page.locator('meta[http-equiv="content-security-policy" i]').getAttribute('content');
+  assert(policy.includes("object-src 'none'"));
+  for (const width of [320, 430, 768, 1440, 3840]) {
+    await page.setViewportSize({width, height: 900});
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), 'Overflow at ' + width);
   }
   await page.goto(origin + base);
   assert.equal(await page.locator('#live-preview').isHidden(),true);

@@ -7,6 +7,7 @@ export default defineConfig({
   site: 'https://imandustnihan.github.io',
   base,
   output: 'static',
+  security: { csp: { directives: ["default-src 'self'", "object-src 'none'", "base-uri 'self'", "frame-src 'self'", "form-action 'none'"] } },
   trailingSlash: 'always',
   build: { format: 'directory' },
 });

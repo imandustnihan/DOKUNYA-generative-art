@@ -7,7 +7,9 @@ for attempt in 1 2 3; do
   if flutter build apk --release 2>&1 | tee "$log"; then
     exit 0
   else
-    status=${PIPESTATUS[0]}
+    statuses=("${PIPESTATUS[@]}")
+    status=${statuses[0]}
+    if [[ $status == 0 ]]; then exit "${statuses[1]}"; fi
   fi
   if ! grep -Eiq '(status code 429|HTTP[^ ]* 429|429 Too Many Requests)' "$log"; then
     exit "$status"

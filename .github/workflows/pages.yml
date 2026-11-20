@@ -31,7 +31,7 @@ jobs:
       - name: Install and check Astro site
         shell: bash
         run: |
-          npm --prefix site install --no-audit --no-fund
+          npm --prefix site ci --no-audit --no-fund
           npm --prefix site run lint
           npm --prefix site run check
           npm --prefix site run build
@@ -40,6 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           flutter pub get
+          dart analyze lib test
           flutter test --reporter expanded
           flutter build web --release --no-web-resources-cdn --base-href "$DOKUNYA_BASE"studio/
           python3 tool/prepare_web.py
@@ -53,6 +54,15 @@ jobs:
           cp web/favicon.png site/dist/favicon.png
           node site/scripts/post_build.mjs
           node site/scripts/verify.mjs --with-studio
+      - name: Exercise the assembled Pages build before deployment
+        shell: bash
+        env:
+          DOKUNYA_WEB_BASE: /${{ github.event.repository.name }}/studio/
+        run: |
+          set -euo pipefail
+          (cd site && npx playwright install --with-deps chromium)
+          npm --prefix site run smoke
+          NODE_PATH="$PWD/site/node_modules" node tool/web_smoke.cjs site/dist/studio
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist

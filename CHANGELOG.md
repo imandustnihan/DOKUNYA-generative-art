@@ -1,3 +1,13 @@
+# Changelog
+
+## 0.1.3+4 — 2026-11-20
+
+- Preserve unreadable drafts during subsequent saves. Protect project identities when starting a new instrument or finishing a save after a workspace switch.
+- Search the lazy-loaded collection by title or instrument. Use the atlas with a software keyboard, preview instruments on focus or hover, and export the visible viewport to PNG.
+- Respect system and user motion preferences independently. The web directory opens a selected instrument in the requested language and gives recovery priority.
+- Cache Gradle modules, back off on Maven HTTP 429, and inspect each Android APK. Lock the Astro dependency tree and exercise the compiled site before Pages deployment.
+- Scope offline caches to each Studio installation and keep the previous build serving open tabs during an update.
+
 # DOKUNYA v0.1.2+3 — source rebrand (not a compiled release)
 
 - User-selected name: **DOKUNYA** (*dokun* + *dünya*).
@@ -6,7 +16,6 @@
 - Retained original installed application identifiers and local storage to protect existing work.
 - Previous builds are not renamed binaries. New builds still require validation.
 
-# Changelog
 
 ## Unreleased — 100-instrument catalog
 

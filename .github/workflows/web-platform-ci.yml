@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: '22'
       - name: Install site dependencies
-        run: npm --prefix site install --no-audit --no-fund
+        run: npm --prefix site ci --no-audit --no-fund
       - run: npm --prefix site run lint
       - run: npm --prefix site run check
       - run: npm --prefix site run build
@@ -55,7 +55,7 @@ jobs:
         run: |
           git clone --depth 1 --branch 3.50.0 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
-      - run: npm --prefix site install --no-audit --no-fund
+      - run: npm --prefix site ci --no-audit --no-fund
       - run: flutter pub get
       - run: dart format --output=none --set-exit-if-changed .
       - run: flutter analyze

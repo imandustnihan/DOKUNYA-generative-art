@@ -33,6 +33,7 @@ jobs:
             git diff -- lib test
             exit 1
           fi
+      - run: dart tool/export_catalog.dart --check
       - run: flutter analyze
       - run: flutter test --reporter expanded
       - run: python3 tool/license_audit.py
