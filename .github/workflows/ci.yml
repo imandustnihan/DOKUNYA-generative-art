@@ -70,6 +70,16 @@ jobs:
         if: matrix.target == 'linux'
         run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
       - run: flutter pub get
+      - name: Cache Gradle distributions and downloaded dependencies
+        if: matrix.target == 'android'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper/dists
+            ~/.gradle/caches/modules-2
+          key: android-gradle-${{ runner.os }}-${{ runner.arch }}-flutter350-${{ hashFiles('android/**/*.gradle.kts', 'android/gradle/wrapper/gradle-wrapper.properties', 'pubspec.lock') }}
+          restore-keys: |
+            android-gradle-${{ runner.os }}-${{ runner.arch }}-flutter350-
       - name: Install Android SDK CMake with retries
         if: matrix.target == 'android'
         shell: bash
@@ -92,7 +102,19 @@ jobs:
           exit 1
       - name: Android development-signed APK
         if: matrix.target == 'android'
-        run: flutter build apk --release
+        run: bash tool/build_android_ci.sh
+      - name: Inspect built APK identity, permissions and signature
+        if: matrix.target == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdk_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          mkdir -p dist
+          "$sdk_tools/apksigner" verify --verbose --print-certs "$apk" > dist/android-signature.txt
+          "$sdk_tools/aapt" dump badging "$apk" > dist/android-manifest.txt
+          grep -F "package: name='dev.artpulse.artpulse'" dist/android-manifest.txt
+          "$sdk_tools/aapt" dump permissions "$apk" > dist/android-permissions.txt
       - name: Web build with local renderer and offline cache
         if: matrix.target == 'web'
         run: |
