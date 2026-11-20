@@ -12,6 +12,7 @@ import '../core/graphics/art_painter.dart';
 import '../core/graphics/engine_catalog.dart';
 import '../core/performance/quality.dart';
 import '../core/storage/platform_files.dart';
+import '../core/storage/project_transfer.dart';
 import '../features/studio/art_canvas.dart';
 import '../features/presets/presets.dart';
 import 'studio_controller.dart';
@@ -63,6 +64,7 @@ class _WorkspaceState extends State<Workspace> {
   @override
   void initState() {
     super.initState();
+    c.addListener(_draftStatus);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (c.repository.unreadableDraft) {
@@ -73,7 +75,28 @@ class _WorkspaceState extends State<Workspace> {
     });
   }
 
+  bool _showingDraftFailure = false;
+  void _draftStatus() {
+    if (_showingDraftFailure == c.draftSaveFailed) return;
+    _showingDraftFailure = c.draftSaveFailed;
+    if (!_showingDraftFailure) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !c.draftSaveFailed) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(t('draftSaveFailed')),
+          action: SnackBarAction(
+            label: t('retry'),
+            onPressed: () => unawaited(c.flushDraft()),
+          ),
+        ),
+      );
+    });
+  }
+
   StudioController get c => widget.controller;
+  final _gallerySearch = TextEditingController();
+  bool _naming = false;
   bool _controlsVisible = true;
   bool _shortLayout = false;
   Timer? _hideTimer;
@@ -94,7 +117,8 @@ class _WorkspaceState extends State<Workspace> {
   }
 
   Future<void> _save() async {
-    if (c.busy) return;
+    if (c.busy || _naming) return;
+    _naming = true;
     final input = TextEditingController(text: c.name);
     final result = await showDialog<String>(
       context: context,
@@ -127,6 +151,7 @@ class _WorkspaceState extends State<Workspace> {
         ],
       ),
     );
+    _naming = false;
     // Let the dialog's outgoing animation detach its editable field.
     if (result != null && mounted) {
       setState(() => c.busy = true);
@@ -156,12 +181,13 @@ class _WorkspaceState extends State<Workspace> {
         name: c.name,
       );
       final name = 'DOKUNYA_${doc.seed}';
+      final origin = _shareOrigin();
       if (project) {
         final ok = await exportBytes(
-          Uint8List.fromList(utf8.encode(ProjectCodec.encode(doc))),
+          Uint8List.fromList(utf8.encode(await encodeProject(doc))),
           '$name.dokunya.json',
           'application/json',
-          _shareOrigin(),
+          origin,
         );
         toast(ok ? 'exported' : 'cancelled');
       } else {
@@ -176,14 +202,14 @@ class _WorkspaceState extends State<Workspace> {
             snapshot,
             width: w,
             height: h,
+            zoom: c.zoom,
+            pan: Offset(
+              c.pan.dx * w / math.max(1, c.canvasSize.width),
+              c.pan.dy * h / math.max(1, c.canvasSize.height),
+            ),
             shader: shader,
           );
-          final ok = await exportBytes(
-            bytes,
-            '$name.png',
-            'image/png',
-            _shareOrigin(),
-          );
+          final ok = await exportBytes(bytes, '$name.png', 'image/png', origin);
           toast(ok ? 'exported' : 'cancelled');
         } finally {
           shader?.dispose();
@@ -207,7 +233,7 @@ class _WorkspaceState extends State<Workspace> {
       if (await file.length() > maxImportBytes) {
         throw const FormatException('size');
       }
-      final doc = ProjectCodec.decode(await file.readAsString());
+      final doc = await decodeProject(await file.readAsString());
       if (!mounted) return;
       if (!await _preserveWork()) return;
       c.open(doc, imported: true);
@@ -222,7 +248,8 @@ class _WorkspaceState extends State<Workspace> {
     // Keep the existing piece as a recoverable local composition before replacing it.
     try {
       await c.save(c.name);
-      return true;
+      // Input can continue while the platform store is committing.
+      return !c.dirty;
     } catch (_) {
       toast('storageError');
       return false;
@@ -340,6 +367,8 @@ class _WorkspaceState extends State<Workspace> {
   @override
   void dispose() {
     _hideTimer?.cancel();
+    c.removeListener(_draftStatus);
+    _gallerySearch.dispose();
     super.dispose();
   }
 
@@ -444,6 +473,20 @@ class _WorkspaceState extends State<Workspace> {
           ),
         ],
         const Spacer(),
+        if (width >= 1100 &&
+            c.page == WorkspacePage.studio &&
+            (c.projectId != null || c.dirty))
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Text(
+                c.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
         if (c.draftSaveFailed)
           Tooltip(
             message: t('draftSaveFailed'),
@@ -609,13 +652,7 @@ class _WorkspaceState extends State<Workspace> {
   );
   Future<void> _selectInstrument(int id) async {
     if (!await _preserveWork()) return;
-    final current = c.engine.settings;
-    c.change(
-      current.copyWith(mode: ArtMode.neonFlow, instrument: id, autoArt: true),
-    );
-    c.restart();
-    c.name = instrumentName(id);
-    if (mounted) setState(() {});
+    c.startInstrument(id);
   }
 
   Future<void> _openEngineLibrary() async {
@@ -631,256 +668,282 @@ class _WorkspaceState extends State<Workspace> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) => StatefulBuilder(
-        builder: (sheetContext, update) => FractionallySizedBox(
-          heightFactor: .94,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final columns = width >= 1150
-                  ? 5
-                  : width >= 760
-                  ? 4
-                  : width >= 460
-                  ? 3
-                  : 2;
-              final ids = List.generate(instrumentCount, (i) => i).where((id) {
-                final categoryMatches = family < 0 || id ~/ 10 == family;
-                final queryMatches =
-                    search.isEmpty ||
-                    instrumentName(id).toLowerCase().contains(search) ||
-                    instrumentFamily(id).toLowerCase().contains(search);
-                return (!favoritesOnly || c.favoriteInstruments.contains(id)) &&
-                    categoryMatches &&
-                    queryMatches;
-              }).toList();
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
-                    child: Row(
+        builder: (sheetContext, update) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom,
+          ),
+          child: FractionallySizedBox(
+            heightFactor: .94,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final columns = width >= 1150
+                    ? 5
+                    : width >= 760
+                    ? 4
+                    : width >= 460
+                    ? 3
+                    : 2;
+                final ids = List.generate(instrumentCount, (i) => i).where((
+                  id,
+                ) {
+                  final categoryMatches = family < 0 || id ~/ 10 == family;
+                  final queryMatches =
+                      search.isEmpty ||
+                      instrumentName(id).toLowerCase().contains(search) ||
+                      instrumentFamily(id).toLowerCase().contains(search);
+                  return (!favoritesOnly ||
+                          c.favoriteInstruments.contains(id)) &&
+                      categoryMatches &&
+                      queryMatches;
+                }).toList();
+                return CustomScrollView(
+                  key: const ValueKey('engine_grid'),
+                  slivers: [
+                    SliverList.list(
                       children: [
-                        const Icon(Icons.auto_awesome, color: accent),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 18, 12, 8),
+                          child: Row(
                             children: [
-                              Text(
-                                t('engineAtlas'),
-                                style: TextStyle(
-                                  color: accent.withValues(alpha: .9),
-                                  fontSize: 10,
-                                  letterSpacing: 2.4,
-                                  fontWeight: FontWeight.w800,
+                              const Icon(Icons.auto_awesome, color: accent),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t('engineAtlas'),
+                                      style: TextStyle(
+                                        color: accent.withValues(alpha: .9),
+                                        fontSize: 10,
+                                        letterSpacing: 2.4,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                    Text(
+                                      t('engineWorlds'),
+                                      style: const TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Text(
-                                t('engineWorlds'),
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              IconButton(
+                                onPressed: () => Navigator.pop(sheetContext),
+                                tooltip: t('engineClose'),
+                                icon: const Icon(Icons.close),
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(sheetContext),
-                          tooltip: t('engineClose'),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
-                    child: TextField(
-                      key: const ValueKey('engine_search'),
-                      onChanged: (value) =>
-                          update(() => search = value.trim().toLowerCase()),
-                      decoration: InputDecoration(
-                        hintText: t('engineSearch'),
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: const Color(0xff1d1e2a),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 56,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      children: [
-                        ChoiceChip(
-                          key: const ValueKey('engine_favorites_chip'),
-                          avatar: const Icon(Icons.favorite, size: 16),
-                          label: Text(
-                            "${t('engineFavorites')} (${c.favoriteInstruments.length})",
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
                           ),
-                          selected: favoritesOnly,
-                          onSelected: (selected) =>
-                              update(() => favoritesOnly = selected),
-                        ),
-                        const SizedBox(width: 8),
-                        for (var i = -1; i < engineFamilies.length; i++) ...[
-                          ChoiceChip(
-                            label: Text(
-                              i == -1 ? t('engineAll') : engineFamilies[i],
+                          child: TextField(
+                            key: const ValueKey('engine_search'),
+                            onChanged: (value) => update(
+                              () => search = value.trim().toLowerCase(),
                             ),
-                            selected: family == i,
-                            onSelected: (_) => update(() => family = i),
+                            decoration: InputDecoration(
+                              hintText: t('engineSearch'),
+                              prefixIcon: const Icon(Icons.search),
+                              filled: true,
+                              fillColor: const Color(0xff1d1e2a),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 8),
-                        ],
+                        ),
+                        SizedBox(
+                          height: 56,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                            children: [
+                              ChoiceChip(
+                                key: const ValueKey('engine_favorites_chip'),
+                                avatar: const Icon(Icons.favorite, size: 16),
+                                label: Text(
+                                  "${t('engineFavorites')} (${c.favoriteInstruments.length})",
+                                ),
+                                selected: favoritesOnly,
+                                onSelected: (selected) =>
+                                    update(() => favoritesOnly = selected),
+                              ),
+                              const SizedBox(width: 8),
+                              for (
+                                var i = -1;
+                                i < engineFamilies.length;
+                                i++
+                              ) ...[
+                                ChoiceChip(
+                                  label: Text(
+                                    i == -1
+                                        ? t('engineAll')
+                                        : engineFamilies[i],
+                                  ),
+                                  selected: family == i,
+                                  onSelected: (_) => update(() => family = i),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                  Expanded(
-                    child: ids.isEmpty
-                        ? Center(child: Text(t('engineEmpty')))
-                        : GridView.builder(
-                            key: const ValueKey('engine_grid'),
-                            padding: const EdgeInsets.all(18),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: columns,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: width < 460 ? .81 : .85,
-                                ),
-                            itemCount: ids.length,
-                            itemBuilder: (context, index) {
-                              final id = ids[index];
-                              final selected =
-                                  c.engine.settings.instrument == id;
-                              return InkWell(
-                                key: ValueKey('instrument_$id'),
-                                onTap: () async {
-                                  Navigator.pop(sheetContext);
-                                  await _selectInstrument(id);
-                                },
-                                borderRadius: BorderRadius.circular(15),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xff1b1b28),
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(
-                                      color: selected
-                                          ? accent
-                                          : const Color(0xff353044),
-                                    ),
+                    if (ids.isEmpty)
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: Text(t('engineEmpty'))),
+                      )
+                    else
+                      SliverPadding(
+                        padding: const EdgeInsets.all(18),
+                        sliver: SliverGrid.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columns,
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                                mainAxisExtent:
+                                    (width / columns * .82).clamp(
+                                      120.0,
+                                      235.0,
+                                    ) +
+                                    MediaQuery.textScalerOf(context).scale(30),
+                              ),
+                          itemCount: ids.length,
+                          itemBuilder: (context, index) {
+                            final id = ids[index];
+                            final selected = c.engine.settings.instrument == id;
+                            return InkWell(
+                              key: ValueKey('instrument_$id'),
+                              onTap: () async {
+                                Navigator.pop(sheetContext);
+                                await _selectInstrument(id);
+                              },
+                              borderRadius: BorderRadius.circular(15),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xff1b1b28),
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: selected
+                                        ? accent
+                                        : const Color(0xff353044),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.vertical(
-                                                    top: Radius.circular(14),
-                                                  ),
-                                              child: _InstrumentThumbnail(
-                                                key: ValueKey('preview_$id'),
-                                                id: id,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 5,
-                                              right: 5,
-                                              child: Material(
-                                                color: const Color(0xb710111a),
-                                                shape: const CircleBorder(),
-                                                child: IconButton(
-                                                  key: ValueKey('favorite_$id'),
-                                                  tooltip: t(
-                                                    'engineFavoriteToggle',
-                                                  ),
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  iconSize: 19,
-                                                  icon: Icon(
-                                                    c.favoriteInstruments
-                                                            .contains(id)
-                                                        ? Icons.favorite
-                                                        : Icons.favorite_border,
-                                                    color:
-                                                        c.favoriteInstruments
-                                                            .contains(id)
-                                                        ? accent
-                                                        : Colors.white,
-                                                  ),
-                                                  onPressed: () => _guard(() async {
-                                                    await c
-                                                        .toggleFavoriteInstrument(
-                                                          id,
-                                                        );
-                                                    if (sheetContext.mounted) {
-                                                      update(() {});
-                                                    }
-                                                  }),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.vertical(
+                                                  top: Radius.circular(14),
                                                 ),
+                                            child: _InstrumentThumbnail(
+                                              reduceMotion: c.reducedMotion,
+                                              key: ValueKey('preview_$id'),
+                                              id: id,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 5,
+                                            right: 5,
+                                            child: Material(
+                                              color: const Color(0xb710111a),
+                                              shape: const CircleBorder(),
+                                              child: IconButton(
+                                                key: ValueKey('favorite_$id'),
+                                                tooltip: t(
+                                                  'engineFavoriteToggle',
+                                                ),
+                                                visualDensity:
+                                                    VisualDensity.standard,
+                                                iconSize: 19,
+                                                icon: Icon(
+                                                  c.favoriteInstruments
+                                                          .contains(id)
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color:
+                                                      c.favoriteInstruments
+                                                          .contains(id)
+                                                      ? accent
+                                                      : Colors.white,
+                                                ),
+                                                onPressed: () => _guard(() async {
+                                                  await c
+                                                      .toggleFavoriteInstrument(
+                                                        id,
+                                                      );
+                                                  if (sheetContext.mounted) {
+                                                    update(() {});
+                                                  }
+                                                }),
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          11,
-                                          9,
-                                          8,
-                                          11,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              instrumentName(id),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                            Text(
-                                              '${(id + 1).toString().padLeft(3, '0')} · ${instrumentFamily(id)}',
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: muted,
-                                                fontSize: 9,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        11,
+                                        9,
+                                        8,
+                                        11,
                                       ),
-                                    ],
-                                  ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            instrumentName(id),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${(id + 1).toString().padLeft(3, '0')} · ${instrumentFamily(id)}',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: muted,
+                                              fontSize: 9,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -1610,6 +1673,7 @@ class _WorkspaceState extends State<Workspace> {
                             top: Radius.circular(14),
                           ),
                           child: _InstrumentThumbnail(
+                            reduceMotion: c.reducedMotion,
                             key: ValueKey('featured_$id'),
                             id: id,
                           ),
@@ -1677,70 +1741,116 @@ class _WorkspaceState extends State<Workspace> {
   Widget _gallery() => LayoutBuilder(
     builder: (context, bounds) {
       final cols = math.max(1, (bounds.maxWidth / 330).floor());
-      return ListView(
-        padding: EdgeInsets.all(bounds.maxWidth < 600 ? 20 : 32),
-        children: [
-          Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 16,
-            runSpacing: 12,
-            children: [
-              Text(
-                t('savedWork'),
-                style: const TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w600,
+      final query = _gallerySearch.text.trim().toLowerCase();
+      final visible = c.documents
+          .where((doc) {
+            final tool = doc.settings.instrument < 0
+                ? modeNames[doc.settings.mode.index]
+                : instrumentName(doc.settings.instrument);
+            return query.isEmpty ||
+                doc.name.toLowerCase().contains(query) ||
+                tool.toLowerCase().contains(query);
+          })
+          .toList(growable: false);
+      final inset = bounds.maxWidth < 600 ? 20.0 : 32.0;
+      return CustomScrollView(
+        key: const PageStorageKey('collection_scroll'),
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(inset, inset, inset, 0),
+            sliver: SliverList.list(
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 12,
+                  children: [
+                    Text(
+                      t('savedWork'),
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    OutlinedButton.icon(
+                      onPressed: _import,
+                      icon: const Icon(Icons.file_open_outlined),
+                      label: Text(t('import')),
+                    ),
+                  ],
                 ),
-              ),
-              OutlinedButton.icon(
-                onPressed: _import,
-                icon: const Icon(Icons.file_open_outlined),
-                label: Text(t('import')),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          if (c.repository.unreadableProjects > 0)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Text(t('corrupt'), style: const TextStyle(color: accent)),
+                const SizedBox(height: 24),
+                if (c.repository.unreadableProjects > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Text(
+                      t('corrupt'),
+                      style: const TextStyle(color: accent),
+                    ),
+                  ),
+                if (c.documents.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 18),
+                    child: TextField(
+                      key: const ValueKey('collection_search'),
+                      controller: _gallerySearch,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: t('gallerySearch'),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: _gallerySearch.text.isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: t('clearSearch'),
+                                icon: const Icon(Icons.close),
+                                onPressed: () => setState(_gallerySearch.clear),
+                              ),
+                      ),
+                    ),
+                  ),
+                if (c.documents.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 64),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.auto_awesome_outlined,
+                          size: 46,
+                          color: accent,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          t('emptyGallery'),
+                          style: const TextStyle(fontSize: 18),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          t('emptyGalleryHint'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: muted),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton(
+                          onPressed: () => c.navigate(WorkspacePage.studio),
+                          child: Text(t('openStudio')),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (c.documents.isNotEmpty && visible.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Text(t('galleryNoMatches')),
+                  ),
+              ],
             ),
-          if (c.documents.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 64),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.auto_awesome_outlined,
-                    size: 46,
-                    color: accent,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    t('emptyGallery'),
-                    style: const TextStyle(fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    t('emptyGalleryHint'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: muted),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () => c.navigate(WorkspacePage.studio),
-                    child: Text(t('openStudio')),
-                  ),
-                ],
-              ),
-            )
-          else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: c.documents.length,
+          ),
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(inset, 0, inset, inset),
+            sliver: SliverGrid.builder(
+              itemCount: visible.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: cols,
                 crossAxisSpacing: 16,
@@ -1748,7 +1858,7 @@ class _WorkspaceState extends State<Workspace> {
                 mainAxisExtent: 260,
               ),
               itemBuilder: (context, i) {
-                final d = c.documents[i];
+                final d = visible[i];
                 return _artCard(
                   title: d.name,
                   subtitle: d.settings.instrument >= 0
@@ -1761,7 +1871,11 @@ class _WorkspaceState extends State<Workspace> {
                     document: d,
                   ),
                   onTap: () async {
-                    if (await _preserveWork()) c.open(d);
+                    if (!await _preserveWork()) return;
+                    final latest = c.documents
+                        .where((entry) => entry.id == d.id)
+                        .firstOrNull;
+                    if (latest != null) c.open(latest);
                   },
                   trailing: IconButton(
                     tooltip: t('delete'),
@@ -1771,6 +1885,7 @@ class _WorkspaceState extends State<Workspace> {
                 );
               },
             ),
+          ),
         ],
       );
     },
@@ -1838,7 +1953,9 @@ class _WorkspaceState extends State<Workspace> {
             key: const ValueKey('reduced_motion'),
             contentPadding: EdgeInsets.zero,
             value: c.reducedMotion,
-            onChanged: (v) => _guard(() => c.preferences(reduce: v)),
+            onChanged: c.systemReduceMotion
+                ? null
+                : (v) => _guard(() => c.preferences(reduce: v)),
             title: Text(t('reduceMotion')),
             subtitle: Text(
               t('reduceHint'),
@@ -1903,7 +2020,7 @@ class _WorkspaceState extends State<Workspace> {
             onPressed: () => showLicensePage(
               context: context,
               applicationName: 'DOKUNYA',
-              applicationVersion: '0.1.0',
+              applicationVersion: '0.1.3',
             ),
             icon: const Icon(Icons.code, size: 18),
             label: Text(t('licenses')),
@@ -2113,13 +2230,22 @@ class _PreviewState extends State<_Preview> {
 
 /// Lightweight preview uses the same procedural renderer as the full canvas.
 class _InstrumentThumbnail extends StatefulWidget {
-  const _InstrumentThumbnail({super.key, required this.id});
+  const _InstrumentThumbnail({
+    super.key,
+    required this.id,
+    required this.reduceMotion,
+  });
   final int id;
+  final bool reduceMotion;
   @override
   State<_InstrumentThumbnail> createState() => _InstrumentThumbnailState();
 }
 
-class _InstrumentThumbnailState extends State<_InstrumentThumbnail> {
+class _InstrumentThumbnailState extends State<_InstrumentThumbnail>
+    with SingleTickerProviderStateMixin {
+  final _clock = ArtClock();
+  AnimationController? _motion;
+  bool _hovered = false;
   late final ArtEngine engine =
       ArtEngine(
           seed: 2749 + widget.id * 313,
@@ -2132,8 +2258,57 @@ class _InstrumentThumbnailState extends State<_InstrumentThumbnail> {
         ..budget = QualityBudget.profiles[0]
         ..time = 4.7;
 
+  void _syncMotion() {
+    if (widget.reduceMotion ||
+        !(_hovered || (Focus.maybeOf(context)?.hasFocus ?? false))) {
+      _motion?.stop();
+      return;
+    }
+    final motion = _motion ??=
+        AnimationController(vsync: this, duration: const Duration(seconds: 3))
+          ..addListener(() {
+            final next = 4.7 + (_motion!.value * 36).floor() / 12;
+            if (engine.time == next) return;
+            engine.time = next;
+            _clock.pulse();
+          });
+    if (!motion.isAnimating) motion.forward(from: 0);
+  }
+
   @override
-  Widget build(BuildContext context) => RepaintBoundary(
-    child: CustomPaint(painter: ArtPainter(engine), size: Size.infinite),
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(_InstrumentThumbnail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.reduceMotion != widget.reduceMotion) _syncMotion();
+  }
+
+  @override
+  void dispose() {
+    _motion?.dispose();
+    _clock.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) {
+      _hovered = true;
+      _syncMotion();
+    },
+    onExit: (_) {
+      _hovered = false;
+      _syncMotion();
+    },
+    child: RepaintBoundary(
+      child: CustomPaint(
+        painter: ArtPainter(engine, repaint: _clock),
+        size: Size.infinite,
+      ),
+    ),
   );
 }

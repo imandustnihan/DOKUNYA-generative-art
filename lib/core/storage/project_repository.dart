@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../graphics/art_model.dart';
 import 'key_value_store.dart';
+import 'project_transfer.dart';
 
 class ProjectRepository {
   ProjectRepository(this.store);
@@ -15,7 +16,8 @@ class ProjectRepository {
   }
 
   Future<void> save(ArtDocument document) => _serialize(
-    () => store.write('project_${document.id}', ProjectCodec.encode(document)),
+    () async =>
+        store.write('project_${document.id}', await encodeProject(document)),
   );
   Future<void> delete(String id) =>
       _serialize(() => store.remove('project_$id'));
@@ -27,7 +29,7 @@ class ProjectRepository {
       if (!key.startsWith('project_')) continue;
       try {
         final text = await store.read(key);
-        if (text != null) docs.add(ProjectCodec.decode(text));
+        if (text != null) docs.add(await decodeProject(text));
       } on FormatException {
         unreadableProjects++;
       }
@@ -50,9 +52,11 @@ class ProjectRepository {
   Future<void> savePreferences(Map<String, Object> preferences) =>
       _serialize(() => store.write('preferences', jsonEncode(preferences)));
 
+  String _draftKey = 'workspace_draft';
+
   /// Keeps in-progress artwork separate from the user's named projects.
   Future<void> saveDraft(ArtDocument document) => _serialize(
-    () => store.write('workspace_draft', ProjectCodec.encode(document)),
+    () async => store.write(_draftKey, await encodeProject(document)),
   );
 
   bool unreadableDraft = false;
@@ -60,20 +64,20 @@ class ProjectRepository {
   /// Invalid project JSON remains on disk so it can be recovered manually.
   Future<ArtDocument?> loadDraft() async {
     await _queue;
-    final raw = await store.read('workspace_draft');
     unreadableDraft = false;
-    if (raw == null) return null;
-    try {
-      return ProjectCodec.decode(raw);
-    } on FormatException {
-      unreadableDraft = true;
-      return null;
-    } on TypeError {
-      unreadableDraft = true;
-      return null;
+    _draftKey = 'workspace_draft';
+    for (var slot = 1; ; slot++) {
+      try {
+        final raw = await store.read(_draftKey);
+        return raw == null ? null : await decodeProject(raw);
+      } on FormatException {
+        // Preserve damaged or oversized bytes in place, including when a new
+        // drawing is saved or cleared. A later launch follows the same slots.
+        unreadableDraft = true;
+        _draftKey = 'workspace_draft_after_damage_$slot';
+      }
     }
   }
 
-  Future<void> clearDraft() =>
-      _serialize(() => store.remove('workspace_draft'));
+  Future<void> clearDraft() => _serialize(() => store.remove(_draftKey));
 }

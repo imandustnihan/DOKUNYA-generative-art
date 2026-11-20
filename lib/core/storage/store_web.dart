@@ -13,13 +13,21 @@ Future<KeyValueStore> createStore() async {
     database.createObjectStore('documents');
   }).toJS;
   request.onsuccess = ((web.Event event) {
-    completer.complete(BrowserStore(request.result as web.IDBDatabase));
+    final database = request.result as web.IDBDatabase;
+    if (completer.isCompleted) {
+      database.close();
+      return;
+    }
+    database.onversionchange = ((web.Event _) => database.close()).toJS;
+    completer.complete(BrowserStore(database));
   }).toJS;
   request.onerror = ((web.Event event) {
-    completer.completeError(StateError('storage'));
+    if (!completer.isCompleted) completer.completeError(StateError('storage'));
   }).toJS;
   request.onblocked = ((web.Event event) {
-    completer.completeError(StateError('storage blocked'));
+    if (!completer.isCompleted) {
+      completer.completeError(StateError('storage blocked'));
+    }
   }).toJS;
   return completer.future;
 }
@@ -41,6 +49,7 @@ class BrowserStore implements KeyValueStore {
     final tx = database.transaction('documents'.toJS, 'readonly');
     final value = await _readRequest(tx.objectStore('documents').get(key.toJS));
     if (value == null || value.isUndefinedOrNull) return null;
+    if (!value.isA<JSString>()) throw const FormatException('storage type');
     return (value as JSString).toDart;
   }
 

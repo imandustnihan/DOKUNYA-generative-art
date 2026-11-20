@@ -1,12 +1,15 @@
 ---
 import Shell from '../layouts/Shell.astro';
+import instruments from '../data/instruments.json';
 import { copy, modeNames, route, type Language, type PageName } from '../data/content';
 
 interface Props { language: Language; page: PageName }
 const { language, page } = Astro.props;
 const tx = copy[language];
 const base = import.meta.env.BASE_URL;
-const studioHref = base + 'studio/';
+const studioHref = base + 'studio/?lang=' + language;
+const modeIds = ['neon_flow', 'particle_galaxy', 'symmetry_lab', 'liquid_light', 'geometry_pulse'];
+const families = [...new Set(instruments.map((item) => item.family))];
 const modeDescription = (i: number) => tx.modeDescriptions[i];
 const pageDetails: Record<PageName, [string, string]> = {
   home: [tx.heroTitle, tx.heroBody],
@@ -34,15 +37,15 @@ const [heading, description] = pageDetails[page];
           </div>
           <div class="hero-visual" aria-label={tx.visualLabel}>
             <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
-            <div class="visual-rail"><span>THE CREATIVE SPACE</span><span>001 — 005</span></div>
+
             <div class="visual-frame">
               <img src={base + 'media/studio-preview.png'} alt={tx.visualLabel} width="1440" height="900" fetchpriority="high" decoding="async" />
             </div>
-            <div class="visual-bottom"><span class="pulse-dot"></span> DOKUNYA STUDIO <span>FLUTTER / REAL ENGINE</span></div>
+
           </div>
         </section>
         <div class="capability-strip" aria-label="DOKUNYA">
-          <div class="wrap strip-inner">{tx.strip.map((text, i) => <span><i aria-hidden="true">{String(i + 1).padStart(2, '0')}</i>{text}</span>)}</div>
+          <div class="wrap strip-inner">{tx.strip.map((text) => <span>{text}</span>)}</div>
         </div>
         <section class="section wrap" id="engines">
           <div class="section-heading">
@@ -51,7 +54,7 @@ const [heading, description] = pageDetails[page];
           </div>
           <div class="engine-grid">
             {modeNames.map((mode, i) => (
-              <a class={'engine-card engine-' + i} href={studioHref} aria-label={mode}>
+              <a class={'engine-card engine-' + i} href={studioHref + '&mode=' + modeIds[i]} aria-label={mode}>
                 <div class="engine-illustration" aria-hidden="true"><span class="ring ring-1"></span><span class="ring ring-2"></span><span class="ring ring-3"></span><span class="engine-core"></span></div>
                 <span class="engine-number">0{i + 1} / 05</span>
                 <div class="engine-content"><h3>{mode}</h3><p>{modeDescription(i)}</p></div>
@@ -61,14 +64,14 @@ const [heading, description] = pageDetails[page];
           </div>
         </section>
         <section class="section wrap workflow">
-          <div class="section-heading"><div><div class="eyebrow">DOKUNYA / WORKFLOW</div><h2>{tx.workflowTitle}</h2></div></div>
+          <div class="section-heading"><div><h2>{tx.workflowTitle}</h2></div></div>
           <div class="workflow-grid">
             {tx.workflowSteps.map((item) => (
               <div class="workflow-step"><span>{item[0]}</span><p>{item[1]}</p></div>
             ))}
           </div>
           <div class="live-box">
-            <div><span class="live-tag"><span class="pulse-dot"></span> LIVE ENGINE</span><h2>{tx.previewTitle}</h2><p>{tx.previewHelp}</p></div>
+            <div><h2>{tx.previewTitle}</h2><p>{tx.previewHelp}</p></div>
             <button class="button button-primary" type="button" data-preview-open>{tx.preview}<span aria-hidden="true">↗</span></button>
           </div>
           <div class="live-preview" id="live-preview" hidden>
@@ -76,17 +79,34 @@ const [heading, description] = pageDetails[page];
             <iframe title={tx.previewTitle} loading="lazy" data-src={studioHref} allow="fullscreen" allowfullscreen></iframe>
           </div>
         </section>
-        <section class="closing wrap"><span class="eyebrow">PRIVATE BY DESIGN</span><h2>{tx.privacyPill}</h2><p>{tx.privacyNote}</p><a href={route(language, 'privacy', base)}>{tx.nav.privacy}<span aria-hidden="true"> ↗</span></a></section>
+        <section class="closing wrap"><h2>{tx.privacyPill}</h2><p>{tx.privacyNote}</p><a href={route(language, 'privacy', base)}>{tx.nav.privacy}<span aria-hidden="true"> ↗</span></a></section>
       </>
     )}
     {page === 'discover' && (
       <section class="page-section wrap">
-        <div class="page-intro"><span class="eyebrow">01 — 05 / ART ENGINES</span><h1>{tx.discoverTitle}</h1><p class="lead">{tx.discoverLead}</p></div>
+        <div class="page-intro"><h1>{tx.discoverTitle}</h1><p class="lead">{tx.discoverLead}</p></div>
+        <section class="catalog" aria-labelledby="catalog-title">
+          <div class="catalog-head">
+            <h2 id="catalog-title">{tx.catalogTitle}</h2>
+            <label>{tx.catalogSearch}<input type="search" data-catalog-search autocomplete="off" /></label>
+          </div>
+          <div class="catalog-families">
+            {families.map((family) => (
+              <details class="catalog-family">
+                <summary>{family}</summary>
+                <ul>{instruments.filter((item) => item.family === family).map((item) =>
+                  <li><a href={studioHref + '&instrument=' + item.id} data-instrument={item.name}>{item.name}<span aria-hidden="true">↗</span></a></li>
+                )}</ul>
+              </details>
+            ))}
+          </div>
+          <p role="status" data-catalog-empty hidden>{tx.noMatches}</p>
+        </section>
         <div class="discovery-grid">
           {modeNames.map((mode, i) => (
             <article class={'discovery-item engine-' + i}>
               <div class="discovery-art" aria-hidden="true"><span class="ring ring-1"></span><span class="ring ring-2"></span><span class="ring ring-3"></span><span class="engine-core"></span></div>
-              <div class="discovery-details"><span class="engine-number">ENGINE 0{i + 1}</span><h2>{mode}</h2><p>{modeDescription(i)}</p><a class="inline-link" href={studioHref}>{tx.start}<span aria-hidden="true">↗</span></a></div>
+              <div class="discovery-details"><span class="engine-number">ENGINE 0{i + 1}</span><h2>{mode}</h2><p>{modeDescription(i)}</p><a class="inline-link" href={studioHref + '&mode=' + modeIds[i]}>{tx.start}<span aria-hidden="true">↗</span></a></div>
             </article>
           ))}
         </div>
@@ -94,26 +114,54 @@ const [heading, description] = pageDetails[page];
     )}
     {page === 'guide' && (
       <section class="page-section wrap">
-        <div class="page-intro"><span class="eyebrow">DOKUNYA / DOCUMENTATION</span><h1>{tx.guideTitle}</h1><p class="lead">{tx.guideLead}</p></div>
+        <div class="page-intro"><h1>{tx.guideTitle}</h1><p class="lead">{tx.guideLead}</p></div>
         <div class="guide-grid">{tx.guideItems.map((item, i) => <article class="info-panel"><span class="info-index">0{i + 1}</span><h2>{item[0]}</h2><p>{item[1]}</p></article>)}</div>
         <div class="page-action"><a class="button button-primary" href={studioHref}>{tx.start} ↗</a></div>
       </section>
     )}
     {page === 'about' && (
       <section class="page-section wrap narrow">
-        <div class="page-intro"><span class="eyebrow">ABOUT / DOKUNYA</span><h1>{tx.aboutTitle}</h1><p class="lead">{tx.aboutLead}</p></div>
+        <div class="page-intro"><h1>{tx.aboutTitle}</h1><p class="lead">{tx.aboutLead}</p></div>
         <div class="editorial"><p>{tx.aboutBody}</p><p>{tx.aboutFoot}</p></div>
         <div class="page-action"><a class="button button-primary" href={studioHref}>{tx.start} ↗</a></div>
       </section>
     )}
     {page === 'privacy' && (
       <section class="page-section wrap">
-        <div class="page-intro"><span class="eyebrow">DATA / PRIVACY</span><h1>{tx.privacyTitle}</h1><p class="lead">{tx.privacyLead}</p></div>
+        <div class="page-intro"><h1>{tx.privacyTitle}</h1><p class="lead">{tx.privacyLead}</p></div>
         <div class="guide-grid">{tx.privacyItems.map((item, i) => <article class="info-panel"><span class="info-index">0{i + 1}</span><h2>{item[0]}</h2><p>{item[1]}</p></article>)}</div>
         <p class="endnote">{tx.privacyNote}</p>
       </section>
     )}
   </main>
+  <script>
+    const search = document.querySelector<HTMLInputElement>('[data-catalog-search]');
+    const empty = document.querySelector<HTMLElement>('[data-catalog-empty]');
+    const families = Array.from(document.querySelectorAll<HTMLDetailsElement>('.catalog-family'));
+    const expanded = new Set<HTMLDetailsElement>();
+    let filtering = false;
+    search?.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      if (query && !filtering) {
+        expanded.clear();
+        families.filter((family) => family.open).forEach((family) => expanded.add(family));
+      }
+      filtering = Boolean(query);
+      let count = 0;
+      for (const family of families) {
+        const familyName = family.querySelector('summary')!.textContent.toLowerCase();
+        let matches = 0;
+        for (const item of family.querySelectorAll('li')) {
+          item.hidden = !familyName.includes(query) && !item.textContent.toLowerCase().includes(query);
+          if (!item.hidden) matches++;
+        }
+        count += matches;
+        family.hidden = matches === 0;
+        family.open = filtering ? matches > 0 : expanded.has(family);
+      }
+      if (empty) empty.hidden = count > 0;
+    });
+  </script>
   {page === 'home' && (
     <script>
       const open = document.querySelector<HTMLButtonElement>('[data-preview-open]');
@@ -129,7 +177,7 @@ const [heading, description] = pageDetails[page];
       });
       close?.addEventListener('click', () => {
         if (panel) panel.hidden = true;
-        if (frame) frame.removeAttribute('src');
+        // Keep the running workspace and its pending draft when the preview closes.
         open?.focus();
       });
     </script>

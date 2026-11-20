@@ -432,6 +432,8 @@ Future<Uint8List> renderPng(
   ArtEngine engine, {
   int width = 1600,
   int height = 1000,
+  double zoom = 1,
+  Offset pan = Offset.zero,
   ui.FragmentShader? shader,
 }) async {
   final w = width.clamp(64, 2560), h = height.clamp(64, 2560);
@@ -439,10 +441,16 @@ Future<Uint8List> renderPng(
   ArtPainter(
     engine,
     shader: shader,
+    zoom: zoom,
+    pan: pan,
   ).paint(canvas, Size(w.toDouble(), h.toDouble()));
   final picture = recorder.endRecording();
-  final image = await picture.toImage(w, h);
-  picture.dispose();
+  late final ui.Image image;
+  try {
+    image = await picture.toImage(w, h);
+  } finally {
+    picture.dispose();
+  }
   try {
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     if (data == null) throw StateError('PNG');

@@ -1,5 +1,20 @@
 # Platform support and validation
 
+## DOKUNYA 0.1.3+4
+
+The [PR 8 check suite](https://github.com/imandustnihan/DOKUNYA-generative-art/pull/8/checks) records quality, native builds and the browser run separately. Download the artifacts from the exact run in the PR. CI retains native archives for 14 days.
+
+| Target | Build and automated coverage | Additional device qualification |
+| --- | --- | --- |
+| Android | Release-mode development-signed APK, package ID, signing and merged permissions | Physical update, share sheet and Play Protect |
+| Windows x64 / Linux x64 | Native runner with engine, plugins and data | End-user display, export dialog and keyboard |
+| macOS / iOS | Release app on macOS, debug app for iOS Simulator | macOS signing/notarization and physical iPhone/iPad signing |
+| Astro + Flutter Web/PWA | Chromium, IndexedDB, PNG and JSON, actual reimport, recovery, offline reload, repository subpath | Safari/iOS and real low-memory phone |
+| Adaptive UI | Seven golden sizes, narrow viewport with keyboard, 3840 × 2160 logical-pixel gallery, remote-style focus | Physical foldable, stylus pressure, Google TV remote, hardware frame rates |
+| Tizen / webOS / tvOS | No native build | Separate port and hardware required |
+
+## Historical ARTPULSE coverage
+
 Date: 2026-11-19. Upstream Flutter support is not the same as a tested ARTPULSE release. A generated runner is source support, not a successful build or device result.
 
 | Platform / device group | Source | Local build evidence | Actual validation / limitation |

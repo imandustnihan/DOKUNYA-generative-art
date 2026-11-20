@@ -1,0 +1,502 @@
+[
+  {
+    "id": 0,
+    "name": "Fermat Drift",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 1,
+    "name": "Logarithmic Bloom",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 2,
+    "name": "Helical Halo",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 3,
+    "name": "Quasar Loop",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 4,
+    "name": "Binary Orbit",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 5,
+    "name": "Comet Spiral",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 6,
+    "name": "Cosmic Knot",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 7,
+    "name": "Elliptic Tide",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 8,
+    "name": "Vortex Bloom",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 9,
+    "name": "Orbital Filigree",
+    "family": "Cosmic Orbits"
+  },
+  {
+    "id": 10,
+    "name": "Silk Horizon",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 11,
+    "name": "Aurora Cascade",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 12,
+    "name": "Midnight Current",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 13,
+    "name": "Sonic Ribbon",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 14,
+    "name": "Prismatic Rain",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 15,
+    "name": "Glacial Veil",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 16,
+    "name": "Solar Wind",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 17,
+    "name": "Tidal Threads",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 18,
+    "name": "Velvet Frequency",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 19,
+    "name": "Electric Current",
+    "family": "Aurora Ribbons"
+  },
+  {
+    "id": 20,
+    "name": "Polygon Ballet",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 21,
+    "name": "Dodeca Pulse",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 22,
+    "name": "Starlight Grid",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 23,
+    "name": "Tessellation",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 24,
+    "name": "Spinning Prism",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 25,
+    "name": "Crystal Crown",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 26,
+    "name": "Geometric Drift",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 27,
+    "name": "Orbiting Diamonds",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 28,
+    "name": "Chromatic Lattice",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 29,
+    "name": "Framed Infinity",
+    "family": "Kinetic Geometry"
+  },
+  {
+    "id": 30,
+    "name": "Magnetic North",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 31,
+    "name": "Curl Domain",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 32,
+    "name": "River Delta",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 33,
+    "name": "Whirlpool Field",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 34,
+    "name": "Wind Atlas",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 35,
+    "name": "Turbulent Stream",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 36,
+    "name": "Counterflow",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 37,
+    "name": "Bioluminescent Drift",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 38,
+    "name": "Gravity Lines",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 39,
+    "name": "Perlin Current",
+    "family": "Flow Fields"
+  },
+  {
+    "id": 40,
+    "name": "Coral Branch",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 41,
+    "name": "Electric Fern",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 42,
+    "name": "Forest Veins",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 43,
+    "name": "Dendrite Bloom",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 44,
+    "name": "Lightning Roots",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 45,
+    "name": "Sakura Stems",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 46,
+    "name": "River Tree",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 47,
+    "name": "Silver Thicket",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 48,
+    "name": "Copper Vines",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 49,
+    "name": "Infinite Branches",
+    "family": "Fractal Gardens"
+  },
+  {
+    "id": 50,
+    "name": "Dust Nebula",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 51,
+    "name": "Starseed",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 52,
+    "name": "Firefly Cluster",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 53,
+    "name": "Ion Storm",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 54,
+    "name": "Stellar Rain",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 55,
+    "name": "Digital Pollen",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 56,
+    "name": "Meteor Dust",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 57,
+    "name": "Quantum Noise",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 58,
+    "name": "Luminous Spores",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 59,
+    "name": "Celestial Swarm",
+    "family": "Celestial Particles"
+  },
+  {
+    "id": 60,
+    "name": "Moiré Halo",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 61,
+    "name": "Wave Interference",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 62,
+    "name": "Parallax Nets",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 63,
+    "name": "Op Art Rings",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 64,
+    "name": "Interlaced Lines",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 65,
+    "name": "Spectral Mesh",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 66,
+    "name": "Offset Grids",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 67,
+    "name": "Optical Echo",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 68,
+    "name": "Crossfade Lattice",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 69,
+    "name": "Contour Mirage",
+    "family": "Optical Structures"
+  },
+  {
+    "id": 70,
+    "name": "Harmonic Pulse",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 71,
+    "name": "Sine Cathedral",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 72,
+    "name": "Oscillator Bloom",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 73,
+    "name": "Pulse Cathedral",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 74,
+    "name": "Resonant Circle",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 75,
+    "name": "Frequency Weave",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 76,
+    "name": "Phase Tension",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 77,
+    "name": "Sonic Petals",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 78,
+    "name": "Spectral Organ",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 79,
+    "name": "Standing Waves",
+    "family": "Resonance Forms"
+  },
+  {
+    "id": 80,
+    "name": "Midnight Atlas",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 81,
+    "name": "Coastal Contours",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 82,
+    "name": "Mountain Echo",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 83,
+    "name": "Elevation Lines",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 84,
+    "name": "Crystal Terrain",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 85,
+    "name": "Tectonic Flow",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 86,
+    "name": "Weather Patterns",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 87,
+    "name": "Mist Map",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 88,
+    "name": "Valley Network",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 89,
+    "name": "Topographic Bloom",
+    "family": "Topographic Dreams"
+  },
+  {
+    "id": 90,
+    "name": "Lotus Prism",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 91,
+    "name": "Glass Mandala",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 92,
+    "name": "Sacred Petals",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 93,
+    "name": "Kaleido Rose",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 94,
+    "name": "Chromatic Fans",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 95,
+    "name": "Radiant Silk",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 96,
+    "name": "Snowflake Bloom",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 97,
+    "name": "Mandala Eclipse",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 98,
+    "name": "Petal Labyrinth",
+    "family": "Kaleidoscope Atelier"
+  },
+  {
+    "id": 99,
+    "name": "Endless Mosaic",
+    "family": "Kaleidoscope Atelier"
+  }
+]

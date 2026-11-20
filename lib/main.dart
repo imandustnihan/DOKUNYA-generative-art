@@ -29,9 +29,10 @@ Future<void> main() async {
 }
 
 Future<void> launchDokunya() async {
+  StudioController? starting;
   try {
     final store = await createStore();
-    final controller = StudioController(ProjectRepository(store));
+    final controller = starting = StudioController(ProjectRepository(store));
     const forceTv =
         bool.fromEnvironment('DOKUNYA_TV') ||
         bool.fromEnvironment('ARTPULSE_TV');
@@ -40,9 +41,12 @@ Future<void> launchDokunya() async {
       deviceLanguage:
           WidgetsBinding.instance.platformDispatcher.locale.languageCode,
     );
+    if (kIsWeb) await controller.applyStudioLink(takeStudioLink());
     runApp(DokunyaApp(controller: controller));
+    starting = null;
     await controller.loadShader();
   } catch (_) {
+    starting?.dispose();
     final language =
         WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     final t = ArtStrings(language);
