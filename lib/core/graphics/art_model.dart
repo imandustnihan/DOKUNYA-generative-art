@@ -119,8 +119,9 @@ class ArtSettings {
     'autoArt': autoArt,
   };
   factory ArtSettings.fromJson(Map<String, dynamic> j) {
-    final i = modeIds.indexOf(j['mode'] as String? ?? '');
+    final i = modeIds.indexWhere((id) => id == j['mode']);
     if (i < 0 ||
+        j['symmetry'] is! int ||
         ![2, 4, 6, 8, 12].contains(j['symmetry']) ||
         j['autoArt'] is! bool) {
       throw const FormatException('settings');
@@ -212,7 +213,8 @@ class ProjectCodec {
   static String encode(ArtDocument document) => jsonEncode(document.toJson());
   static ArtDocument decode(String source) {
     if (source.length > maxImportBytes ||
-        utf8.encode(source).length > maxImportBytes) {
+        (source.length > maxImportBytes ~/ 3 &&
+            utf8.encode(source).length > maxImportBytes)) {
       throw const FormatException('size');
     }
     // Check nesting before handing untrusted content to the JSON parser.

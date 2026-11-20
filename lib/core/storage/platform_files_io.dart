@@ -55,3 +55,5 @@ Future<bool> detectTv() async {
     return false;
   }
 }
+
+Map<String, String> takeStudioLink() => const {};

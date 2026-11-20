@@ -35,3 +35,18 @@ Future<void> setFullscreen(bool value) async {
     await web.document.exitFullscreen().toDart;
   }
 }
+
+Map<String, String> takeStudioLink() {
+  final url = web.URL(web.window.location.href);
+  final options = <String, String>{};
+  for (final key in ['lang', 'mode', 'instrument']) {
+    final value = url.searchParams.get(key);
+    if (value == null) continue;
+    options[key] = value;
+    url.searchParams.delete(key);
+  }
+  if (options.isNotEmpty) {
+    web.window.history.replaceState(web.window.history.state, '', url.href);
+  }
+  return options;
+}

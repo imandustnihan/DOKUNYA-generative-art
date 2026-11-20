@@ -11,3 +11,5 @@ Future<bool> exportBytes(
 Future<void> initializeWindow() async {}
 Future<void> setFullscreen(bool value) async {}
 Future<bool> detectTv() async => false;
+
+Map<String, String> takeStudioLink() => const {};

@@ -33,6 +33,8 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   final Duration draftDelay;
   Timer? _draftTimer;
   int _draftRevision = 0;
+  int _workspaceGeneration = 0;
+  String? _pendingProjectId;
   bool recoveredOnStartup = false;
   bool draftSaveFailed = false;
   final engine = ArtEngine();
@@ -44,8 +46,10 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   ui.FragmentShader? shader;
   String locale = 'en';
   Quality quality = Quality.auto;
-  bool reducedMotion = false,
-      tv = false,
+  bool _systemReduceMotion = false, _preferReducedMotion = false;
+  bool get reducedMotion => _systemReduceMotion || _preferReducedMotion;
+  bool get systemReduceMotion => _systemReduceMotion;
+  bool tv = false,
       paused = false,
       focusMode = false,
       ambient = false,
@@ -92,7 +96,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
               )
             : const <int>[],
       );
-    reducedMotion = pref['reducedMotion'] == true;
+    _preferReducedMotion = pref['reducedMotion'] == true;
     tv = television || pref['tv'] == true;
     quality =
         Quality.values.where((q) => q.name == pref['quality']).firstOrNull ??
@@ -119,6 +123,39 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  Future<void> applyStudioLink(Map<String, String> options) async {
+    final language = options['lang'];
+    if (language != null &&
+        language != locale &&
+        ['tr', 'az', 'en'].contains(language)) {
+      try {
+        await preferences(language: language);
+      } catch (_) {
+        // The chosen language still applies for this session if storage is full.
+      }
+    }
+    if (dirty) return;
+    final id = int.tryParse(options['instrument'] ?? '');
+    final mode = modeIds.indexWhere((value) => value == options['mode']);
+    if (id != null && id >= 0 && id < instrumentCount) {
+      engine.settings = engine.settings.copyWith(
+        mode: ArtMode.neonFlow,
+        instrument: id,
+      );
+      name = instrumentName(id);
+    } else if (mode >= 0) {
+      engine.settings = engine.settings.copyWith(
+        mode: ArtMode.values[mode],
+        instrument: -1,
+      );
+      name = modeNames[mode];
+    } else {
+      return;
+    }
+    engine.restart(engine.seed);
+    notifyListeners();
+  }
+
   Future<void> loadShader() async {
     try {
       final program = await ui.FragmentProgram.fromAsset('shaders/liquid.frag');
@@ -138,8 +175,8 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
       _configured = true;
       _setBudget();
     }
-    if (systemReduceMotion && !reducedMotion) {
-      reducedMotion = true;
+    if (_systemReduceMotion != systemReduceMotion) {
+      _systemReduceMotion = systemReduceMotion;
       _syncTicker();
     }
   }
@@ -262,6 +299,8 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void _discardDraft() {
+    _workspaceGeneration++;
+    _pendingProjectId = null;
     _draftRevision++;
     _draftTimer?.cancel();
     _draftTimer = null;
@@ -368,16 +407,21 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     if (trimmed.isEmpty || trimmed.length > 100) {
       throw const FormatException('name');
     }
-    final id = projectId ?? 'art_${DateTime.now().microsecondsSinceEpoch}';
+    final generation = _workspaceGeneration;
+    final id =
+        projectId ??
+        (_pendingProjectId ??= 'art_${DateTime.now().microsecondsSinceEpoch}');
     final snapshotRevision = _draftRevision;
     final doc = engine.snapshot(id: id, name: trimmed);
     try {
       await repository.save(doc);
-      // Serialized after pending drafts so an old write cannot resurrect one.
-      await repository.clearDraft();
     } catch (_) {
       _scheduleDraft();
       rethrow;
+    }
+    if (_disposed || generation != _workspaceGeneration) {
+      if (!_disposed) await refreshGallery();
+      return;
     }
     projectId = id;
     name = trimmed;
@@ -387,13 +431,14 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
       dirty = false;
       draftSaveFailed = false;
       recoveredOnStartup = false;
+      // Enqueue cleanup before another edit or document switch can occur.
+      await repository.clearDraft();
     } else {
       // Edits made while the save was in flight still require recovery.
       dirty = true;
       await flushDraft();
     }
     await refreshGallery();
-    notifyListeners();
   }
 
   void open(ArtDocument document, {bool imported = false}) {
@@ -414,16 +459,34 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
     await repository.delete(document.id);
     if (projectId == document.id) {
       projectId = null;
-      dirty = true;
+      _pendingProjectId = null;
+      _markDirty();
     }
     await refreshGallery();
   }
 
-  void preset(ArtMode mode, {int palette = 0, int seed = 2749}) {
+  void preset(ArtMode mode, {int palette = 0, int seed = 2749}) =>
+      _newComposition(
+        ArtSettings(mode: mode, palette: palette),
+        seed,
+        '${modeNames[mode.index]} ${seed % 1000}',
+      );
+
+  void startInstrument(int id) {
+    RangeError.checkValueInInterval(id, 0, instrumentCount - 1);
+    final nextSeed = (engine.seed * 1664525 + 1013904223) & 0xffffffff;
+    _newComposition(
+      engine.settings.copyWith(mode: ArtMode.neonFlow, instrument: id),
+      nextSeed == 0 ? 1 : nextSeed,
+      instrumentName(id),
+    );
+  }
+
+  void _newComposition(ArtSettings settings, int seed, String title) {
     _discardDraft();
     projectId = null;
-    name = '${modeNames[mode.index]} ${seed % 1000}';
-    engine.settings = ArtSettings(mode: mode, palette: palette);
+    name = title;
+    engine.settings = settings;
     engine.restart(seed);
     page = WorkspacePage.studio;
     _markDirty();
@@ -436,7 +499,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   Map<String, Object> _preferenceSnapshot() => {
     'locale': locale,
     'quality': quality.name,
-    'reducedMotion': reducedMotion,
+    'reducedMotion': _preferReducedMotion,
     'tv': tv,
     'favoriteInstruments': (favoriteInstruments.toList()..sort()),
   };
@@ -465,7 +528,7 @@ class StudioController extends ChangeNotifier with WidgetsBindingObserver {
   }) async {
     if (language != null) locale = language;
     if (profile != null) quality = profile;
-    if (reduce != null) reducedMotion = reduce;
+    if (reduce != null) _preferReducedMotion = reduce;
     if (television != null) tv = television;
     _setBudget();
     _syncTicker();

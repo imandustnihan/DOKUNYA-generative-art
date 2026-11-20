@@ -128,6 +128,91 @@ void main() {
       }
     });
   }
+  testWidgets(
+    'atlas search, favorite and selection fit a phone with the keyboard open',
+    (tester) async {
+      final c = await boot(tester, size: const Size(320, 568));
+      await tester.tap(find.byKey(const ValueKey('engine_library_open')));
+      await tester.pumpAndSettle();
+      final search = find.byKey(const ValueKey('engine_search'));
+      await tester.enterText(search, 'Endless Mosaic');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 220);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      final favorite = find.byKey(const ValueKey('favorite_99'));
+      await tester.ensureVisible(favorite);
+      await tester.tap(favorite);
+      await tester.pumpAndSettle();
+      expect(c.favoriteInstruments, contains(99));
+      tester.view.resetViewInsets();
+      await tester.pumpAndSettle();
+      final card = find.byKey(const ValueKey('instrument_99'));
+      await tester.ensureVisible(card);
+      await tester.tap(card);
+      await tester.pumpAndSettle();
+      expect(c.engine.settings.instrument, 99);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'large-screen gallery filters by title and tool, restores work, then deletes a confirmed entry',
+    (tester) async {
+      final c = await boot(tester, size: const Size(3840, 2160));
+      c.startInstrument(99);
+      await c.save('Night study');
+      c.preset(ArtMode.liquidLight);
+      await c.save('Water');
+      c.navigate(WorkspacePage.gallery);
+      await tester.pumpAndSettle();
+      final search = find.byKey(const ValueKey('collection_search'));
+      await tester.enterText(search, 'Endless Mosaic');
+      await tester.pumpAndSettle();
+      expect(find.text('Water'), findsNothing);
+      await tester.tap(find.text('Night study'));
+      await tester.pumpAndSettle();
+      expect(c.engine.settings.instrument, 99);
+      c.navigate(WorkspacePage.gallery);
+      await tester.pumpAndSettle();
+      await tester.enterText(search, 'unknown');
+      await tester.pumpAndSettle();
+      expect(find.text(c.t('galleryNoMatches')), findsOneWidget);
+      await tester.enterText(search, 'Water');
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip(c.t('delete')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, c.t('delete')));
+      await tester.pumpAndSettle();
+      expect(c.documents.map((item) => item.name), ['Night study']);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('PNG places ink at the visible zoomed and panned position', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final e = ArtEngine()..clear();
+      e.begin(1, .2, .2, .8);
+      e.end(1);
+      final bytes = await renderPng(
+        e,
+        width: 200,
+        height: 100,
+        zoom: 2,
+        pan: const Offset(10, 5),
+      );
+      final codec = await ui.instantiateImageCodec(bytes);
+      final image = (await codec.getNextFrame()).image;
+      final pixels = (await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      ))!;
+      expect(pixels.getUint8((45 * 200 + 90) * 4), greaterThan(45));
+      expect(pixels.getUint8((20 * 200 + 40) * 4), lessThan(20));
+      image.dispose();
+      codec.dispose();
+    });
+  });
   testWidgets('all three locales apply to the actual UI', (tester) async {
     final c = await boot(tester);
     for (final item in [

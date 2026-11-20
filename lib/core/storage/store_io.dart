@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
@@ -31,7 +32,7 @@ class FileStore implements KeyValueStore {
     if (await file.length() > 4 * 1024 * 1024) {
       throw const FormatException('size');
     }
-    return file.readAsString();
+    return utf8.decode(await file.readAsBytes());
   }
 
   @override
